@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title or "Kaya" }}</title>
+    <meta name="description" content="{{ meta_description or 'Kaya is a self-hosted infrastructure management platform for servers, services, assets, remote access, runbooks, licences and operational information.' }}" />
+    <meta property="og:title" content="{{ title or 'Kaya' }}" />
+    <meta property="og:description" content="{{ meta_description or 'Self-hosted infrastructure management for servers, services, assets, remote access, runbooks and licences.' }}" />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#0d0f13" />
+    <link rel="icon" href="/static/brand/kaya-favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/static/brand/kaya-apple-touch-icon-180.png" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="container header-inner">
+          <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-icon.svg' }}" alt="" /><span>KAYA</span></a>
+          <nav class="site-nav" aria-label="Main navigation">
+            {% for item in nav_items %}
+            <a class="nav-link" href="/{{ item.slug }}">{{ item.title }}</a>
+            {% endfor %}
+            <a class="nav-link" href="/blog">Updates</a>
+            <a class="nav-link nav-cta" href="/install">Get Started</a>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="site-footer">
+        <div class="container footer-grid">
+          <div>
+            <a class="brand brand-lockup footer-brand" href="/"><img class="brand-full-logo footer-full-logo" src="{{ site_config.site_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya - Your Infrastructure. Your Home." /></a>
+            <p>Self-hosted infrastructure, documentation, assets, remote access and monitoring for practical operators.</p>
+          </div>
+          <div>
+            <h2>Product</h2>
+            <a href="/features">Features</a>
+            <a href="/screenshots">Screenshots</a>
+            <a href="/documentation">Documentation</a>
+            <a href="/roadmap">Roadmap</a>
+          </div>
+          <div>
+            <h2>Project</h2>
+            <a href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="{{ settings.demo_url }}">Demo</a>
+            <a href="/blog">Updates</a>
+            <a href="/admin">Admin</a>
+          </div>
+          <div>
+            <h2>Release</h2>
+            <p>{{ settings.kaya_version }}</p>
+            <p>&copy; 2026 Kaya. Self-hosted and open-source.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
+
+
+
+
+
+

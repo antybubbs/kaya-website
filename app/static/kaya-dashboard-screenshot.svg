@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 860" role="img" aria-labelledby="title desc">
+  <title id="title">Kaya Command dashboard screenshot</title>
+  <desc id="desc">Kaya dark Command dashboard showing infrastructure at a glance, side navigation, live status, compute metrics and VM Docker manager.</desc>
+  <defs>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#111820"/>
+      <stop offset="1" stop-color="#2a1c12"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffa733"/>
+      <stop offset="1" stop-color="#ff7a00"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+
+  <rect width="1800" height="860" fill="#080b10"/>
+  <g filter="url(#shadow)">
+    <rect x="1" y="1" width="1798" height="858" rx="18" fill="#0b0e13" stroke="#242a33"/>
+    <rect x="0" y="0" width="194" height="860" fill="#0a0d12" stroke="#242a33"/>
+    <rect x="194" y="0" width="1606" height="44" fill="#0d1117" stroke="#242a33"/>
+
+    <g transform="translate(16 18)">
+      <image href="/static/brand/kaya-icon.svg" width="28" height="28"/>
+      <text x="40" y="22" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="17" font-weight="850" letter-spacing="3">KAYA</text>
+    </g>
+    <circle cx="173" cy="26" r="9" fill="#121821" stroke="#394150"/>
+    <text x="170" y="30" fill="#9ca3af" font-family="Arial" font-size="12">‹</text>
+
+    <g font-family="Inter,Arial,sans-serif" font-size="11" font-weight="800">
+      <rect x="8" y="78" width="178" height="26" rx="6" fill="rgba(255,138,0,.15)" stroke="rgba(255,138,0,.55)"/>
+      <text x="40" y="95" fill="#fff">Dashboard</text>
+      <text x="18" y="95" fill="#ff8a00">▦</text>
+      <g fill="#b7c0cc">
+        <text x="40" y="130">Infrastructure</text><text x="178" y="130">›</text>
+        <text x="40" y="164">Remote Manager</text><text x="178" y="164">›</text>
+        <text x="40" y="198">Networking</text><text x="178" y="198">›</text>
+        <text x="40" y="232">Security</text><text x="178" y="232">›</text>
+        <text x="40" y="266">Monitoring</text><text x="178" y="266">›</text>
+        <text x="40" y="300">Documentation</text><text x="178" y="300">›</text>
+        <line x1="8" y1="326" x2="186" y2="326" stroke="rgba(255,138,0,.16)"/>
+        <text x="40" y="354">Team</text><text x="178" y="354">›</text>
+        <text x="40" y="388">Data Management</text><text x="178" y="388">›</text>
+        <text x="40" y="422">System Settings</text><text x="178" y="422">›</text>
+      </g>
+    </g>
+    <g transform="translate(8 790)" font-family="Inter,Arial,sans-serif" font-size="10" font-weight="760">
+      <rect width="178" height="60" rx="6" fill="#111820" stroke="#2a303a"/>
+      <text x="10" y="18" fill="#9ca3af">Installed</text><text x="143" y="18" fill="#fff">v0.19.1</text>
+      <text x="10" y="38" fill="#9ca3af">Channel</text><text x="145" y="38" fill="#22c55e">Stable</text>
+      <text x="10" y="55" fill="#9ca3af">Update available</text><text x="144" y="55" fill="#ff8a00">v0.19.2</text>
+    </g>
+
+    <g transform="translate(1640 14)" font-family="Inter,Arial,sans-serif" font-size="10" font-weight="850">
+      <rect x="0" y="0" width="56" height="22" rx="6" fill="#2a1d0f" stroke="#ff8a00"/>
+      <text x="9" y="15" fill="#fff">Command</text>
+      <rect x="60" y="0" width="64" height="22" rx="6" fill="#111820" stroke="#2a303a"/>
+      <text x="74" y="15" fill="#cbd5e1">Light Ops</text>
+      <circle cx="146" cy="11" r="14" fill="#2a1d0f" stroke="#8a4c0d"/><text x="142" y="15" fill="#ffd08a">A</text>
+    </g>
+
+    <g transform="translate(214 60)">
+      <rect x="0" y="0" width="1548" height="98" rx="7" fill="url(#hero)" stroke="#2a303a"/>
+      <rect x="0" y="0" width="3" height="98" rx="2" fill="#ff8a00"/>
+      <text x="16" y="26" fill="#ffa733" font-family="Inter,Arial,sans-serif" font-size="10" font-weight="900" letter-spacing="2">KAYA OVERVIEW</text>
+      <text x="16" y="52" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="850">Infrastructure at a glance</text>
+      <text x="16" y="78" fill="#9fb0c3" font-family="Inter,Arial,sans-serif" font-size="12">Live health and capacity across your connected environment.</text>
+      <rect x="1435" y="17" width="83" height="24" rx="12" fill="rgba(34,197,94,.14)" stroke="rgba(34,197,94,.35)"/>
+      <circle cx="1450" cy="29" r="4" fill="#22c55e"/>
+      <text x="1460" y="33" fill="#bbf7d0" font-family="Inter,Arial,sans-serif" font-size="11" font-weight="900">Live</text>
+    </g>
+
+    <g transform="translate(214 170)" font-family="Inter,Arial,sans-serif">
+      <g>
+        <rect width="309" height="82" rx="7" fill="#12161c" stroke="#2a303a"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Compute hosts</text>
+        <text x="14" y="52" fill="#fff" font-size="28" font-weight="850">1</text>
+        <text x="14" y="70" fill="#9fb0c3" font-size="10" font-weight="800">1 connected</text>
+      </g>
+      <g transform="translate(326 0)">
+        <rect width="309" height="82" rx="7" fill="#12161c" stroke="#2a303a"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Workloads</text>
+        <text x="14" y="52" fill="#fff" font-size="28" font-weight="850">3</text>
+        <text x="14" y="70" fill="#9fb0c3" font-size="10" font-weight="800">VMs and containers</text>
+      </g>
+      <g transform="translate(652 0)">
+        <rect width="309" height="82" rx="7" fill="#12161c" stroke="rgba(34,197,94,.45)"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Running</text>
+        <text x="14" y="52" fill="#86efac" font-size="28" font-weight="850">2</text>
+        <text x="14" y="70" fill="#9fb0c3" font-size="10" font-weight="800">healthy</text>
+      </g>
+      <g transform="translate(978 0)">
+        <rect width="309" height="82" rx="7" fill="#12161c" stroke="#2a303a"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Stopped</text>
+        <text x="14" y="52" fill="#fff" font-size="28" font-weight="850">1</text>
+        <text x="14" y="70" fill="#9fb0c3" font-size="10" font-weight="800">inactive</text>
+      </g>
+      <g transform="translate(1304 0)">
+        <rect width="244" height="82" rx="7" fill="#12161c" stroke="#2a303a"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Attention</text>
+        <text x="14" y="52" fill="#fff" font-size="28" font-weight="850">0</text>
+        <text x="14" y="70" fill="#9fb0c3" font-size="10" font-weight="800">warnings</text>
+      </g>
+    </g>
+
+    <g transform="translate(214 262)" font-family="Inter,Arial,sans-serif">
+      <g>
+        <rect width="522" height="58" rx="7" fill="#12161c" stroke="#2a303a"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Compute CPU</text>
+        <text x="470" y="27" fill="#fff" font-size="16" font-weight="850">18.6%</text>
+        <rect x="14" y="42" width="330" height="5" rx="3" fill="#090d13"/>
+        <rect x="14" y="42" width="92" height="5" rx="3" fill="url(#orange)"/>
+      </g>
+      <g transform="translate(532 0)">
+        <rect width="522" height="58" rx="7" fill="#12161c" stroke="#2a303a"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Memory</text>
+        <text x="470" y="27" fill="#fff" font-size="16" font-weight="850">56.2%</text>
+        <rect x="14" y="42" width="330" height="5" rx="3" fill="#090d13"/>
+        <rect x="14" y="42" width="186" height="5" rx="3" fill="url(#orange)"/>
+      </g>
+      <g transform="translate(1064 0)">
+        <rect width="484" height="58" rx="7" fill="#12161c" stroke="#2a303a"/>
+        <text x="14" y="24" fill="#9ca3af" font-size="11" font-weight="850">Storage</text>
+        <text x="436" y="27" fill="#fff" font-size="16" font-weight="850">50%</text>
+        <rect x="14" y="42" width="300" height="5" rx="3" fill="#090d13"/>
+        <rect x="14" y="42" width="150" height="5" rx="3" fill="url(#orange)"/>
+      </g>
+    </g>
+
+    <g transform="translate(214 332)" font-family="Inter,Arial,sans-serif">
+      <rect width="1548" height="72" rx="7" fill="#12161c" stroke="#2a303a"/>
+      <text x="14" y="29" fill="#fff" font-size="18" font-weight="850">VM / Docker Manager</text>
+      <text x="14" y="54" fill="#9fb0c3" font-size="12">Connect Docker and Proxmox to unlock live workload monitoring, history and alerts.</text>
+      <rect x="1454" y="26" width="78" height="22" rx="5" fill="#ff8a00"/>
+      <text x="1466" y="41" fill="#101010" font-size="10" font-weight="900">Open manager</text>
+    </g>
+  </g>
+</svg>

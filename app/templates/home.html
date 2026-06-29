@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero hero-professional">
+  <div class="container hero-brand-row">
+    <img class="hero-logo" src="{{ site_config.site_logo_url }}" alt="Kaya - Your Infrastructure. Your Home." />
+  </div>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Command your self-hosted infrastructure</span>
+      <h1>One private operations console for the systems you run.</h1>
+      <p>Kaya brings servers, services, remote access, runbooks, licences, assets and operational history into a calm self-hosted control plane.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>
+        <a class="button button-secondary" href="/install">Get Started</a>
+        <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+    <dl class="hero-stats" aria-label="Kaya highlights">
+      <div><dt>Private</dt><dd>Your data stays on your host</dd></div>
+      <div><dt>Docker</dt><dd>Compose-first deployment</dd></div>
+      <div><dt>{{ settings.kaya_version }}</dt><dd>Current tracked release</dd></div>
+    </dl>
+  </div>
+  <div class="container hero-shot-wrap" aria-label="Kaya Command dashboard screenshot">
+    <img class="dashboard-screenshot" src="/static/kaya-dashboard-screenshot.svg" alt="Kaya Command dashboard showing infrastructure at a glance, live status, compute metrics and VM Docker Manager." />
+  </div>
+</section>
+
+<section class="container logo-strip" aria-label="Kaya capabilities">
+  <span>Servers</span><span>Services</span><span>Remote Manager</span><span>Runbooks</span><span>Licences</span><span>Audit Logs</span>
+</section>
+
+<section class="section container">
+  <div class="section-heading">
+    <span class="eyebrow">Operational memory</span>
+    <h2>Everything you need to know before touching a service.</h2>
+    <p>Keep asset records, access details, procedures and monitoring context close to the systems they describe.</p>
+  </div>
+  <div class="feature-grid">
+    {% set features = [
+      ('Infrastructure dashboard', 'A fast overview of estate health, ownership and recent operational changes.'),
+      ('Server and service inventory', 'Track hosts, VMs, containers, networks, vendors, locations and critical service notes.'),
+      ('Remote Manager', 'Launch the right access path and keep operational connection details in one controlled place.'),
+      ('Runbooks', 'Write Markdown procedures for incidents, maintenance windows and repeatable admin tasks.'),
+      ('Licence management', 'Capture keys, vendors, renewals and compliance notes before they disappear into inboxes.'),
+      ('Docker/VM monitoring', 'Follow workloads across Docker hosts and virtual machines with practical status context.'),
+      ('Audit logs', 'Review who changed what, when, and why during day-to-day infrastructure work.'),
+      ('Self-hosted deployment', 'Run Kaya on your own hardware with Docker and retain ownership of your operational data.')
+    ] %}
+    {% for feature in features %}
+    <article class="feature-card">
+      <span class="feature-index">{{ loop.index }}</span>
+      <h3>{{ feature[0] }}</h3>
+      <p>{{ feature[1] }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="band">
+  <div class="container split-section">
+    <div>
+      <span class="eyebrow">Why Kaya?</span>
+      <h2>Built for infrastructure that is personal, critical and too specific for generic tooling.</h2>
+      <p>Kaya is for the people who know every server has a story: where it lives, what depends on it, how to reach it, and what to do when it complains at the least convenient possible moment.</p>
+    </div>
+    <div class="reason-list">
+      <div><strong>No cloud dependency</strong><span>Deploy privately, back up simply, and keep control.</span></div>
+      <div><strong>Operator-first records</strong><span>Designed around the information you reach for during real maintenance.</span></div>
+      <div><strong>Small-team friendly</strong><span>Useful for one careful homelabber or a compact operations team.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section container split-section">
+  <div>
+    <span class="eyebrow">Install</span>
+    <h2>Start with Docker Compose.</h2>
+    <p>Clone Kaya, configure your environment and bring it online on your own host.</p>
+  </div>
+  <div class="code-panel">
+    <pre><code>git clone https://github.com/antybubbs/kaya.git
+cd kaya
+cp .env.example .env
+docker compose up -d --build</code></pre>
+  </div>
+</section>
+
+{% if posts %}
+<section class="section container">
+  <div class="section-heading compact-heading">
+    <span class="eyebrow">Updates</span>
+    <h2>Latest from Kaya</h2>
+  </div>
+  <div class="post-grid">
+    {% for post in posts %}
+    <article class="post-card">
+      <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%d %b %Y') }}</time>
+      <h3><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h3>
+      <p>{{ post.excerpt }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+
+
+

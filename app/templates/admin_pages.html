@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="admin-screen container">
+  <div class="admin-panel">
+    {% include "admin_nav.html" %}
+    <header class="admin-panel-header">
+      <div><span class="eyebrow">CMS</span><h1>Pages</h1></div>
+      <a class="button button-primary" href="/admin/pages/new">New page</a>
+    </header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Slug</th><th>Published</th><th>Nav</th><th>Order</th><th></th></tr></thead>
+        <tbody>
+          {% for page in pages %}
+          <tr>
+            <td>{{ page.title }}</td>
+            <td>{% if page.slug %}/{{ page.slug }}{% else %}/{% endif %}</td>
+            <td>{{ "Yes" if page.published else "No" }}</td>
+            <td>{{ "Yes" if page.show_in_navigation else "No" }}</td>
+            <td>{{ page.sort_order }}</td>
+            <td class="table-actions">
+              <a class="button button-ghost" href="/admin/pages/{{ page.id }}/edit">Edit</a>
+              <form method="post" action="/admin/pages/{{ page.id }}/delete" class="inline-form" onsubmit="return confirm('Delete this page?');">
+                <button class="button button-danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
