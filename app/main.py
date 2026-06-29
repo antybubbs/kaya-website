@@ -21,6 +21,7 @@ from .auth import (
     require_admin,
     verify_password,
     get_password_hash,
+    get_or_create_admin_user,
     setup_2fa,
     verify_2fa_setup,
     verify_2fa_token,
@@ -346,15 +347,9 @@ def create_app():
         
         # Fall back to environment credentials
         if email == admin_email and password == admin_password:
-            # Create admin user in database if they don't exist
-            if not admin:
-                admin = models.AdminUser(
-                    email=admin_email,
-                    password_hash=get_password_hash(admin_password)
-                )
-                db.add(admin)
-                db.commit()
-            login_user(request, admin_email)
+            # Get or create admin user in database
+            admin = get_or_create_admin_user(db)
+            login_user(request, admin.email)
             return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
         
         return render_template("admin_login.html", title="Admin login", nav_items=[], error="Invalid credentials", settings=settings)
@@ -572,12 +567,8 @@ def create_app():
         if not admin_email:
             admin_email, _ = get_admin_credentials()
         
-        admin = crud.get_admin_by_email(db, admin_email)
-        if not admin:
-            admin = models.AdminUser(email=admin_email, password_hash=get_password_hash(get_admin_credentials()[1]))
-            db.add(admin)
-            db.commit()
-            db.refresh(admin)
+        # Get or create admin user - handles password hashing safely
+        admin = get_or_create_admin_user(db)
         
         message = None
         error = None

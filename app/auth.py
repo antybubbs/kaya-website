@@ -33,9 +33,11 @@ def get_or_create_admin_user(db: Session) -> models.AdminUser:
     ).first()
     
     if not admin:
+        # Truncate password to 72 bytes for bcrypt compatibility
+        admin_password = settings.admin_password[:72] if settings.admin_password else "changeme"
         admin = models.AdminUser(
             email=settings.admin_email,
-            password_hash=get_password_hash(settings.admin_password),
+            password_hash=get_password_hash(admin_password),
         )
         db.add(admin)
         db.commit()
