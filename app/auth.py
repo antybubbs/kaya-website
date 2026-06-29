@@ -146,16 +146,19 @@ def require_admin(request: Request):
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
-def login_user(request: Request):
+def login_user(request: Request, email: str = ""):
     """Set admin authentication session."""
     request.session["admin_authenticated"] = True
     request.session["login_time"] = datetime.utcnow().isoformat()
+    if email:
+        request.session["admin_email"] = email
 
 
 def logout_user(request: Request):
     """Clear admin authentication session."""
     request.session.pop("admin_authenticated", None)
     request.session.pop("login_time", None)
+    request.session.pop("admin_email", None)
     request.session.pop("pending_2fa", None)
 
 

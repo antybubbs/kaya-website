@@ -14,9 +14,20 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from . import crud, models, schemas
-from .auth import get_admin_credentials, login_user, logout_user, require_admin
+from .auth import (
+    get_admin_credentials,
+    login_user,
+    logout_user,
+    require_admin,
+    verify_password,
+    get_password_hash,
+    setup_2fa,
+    verify_2fa_setup,
+    verify_2fa_token,
+)
 from .config import settings
 from .database import SessionLocal, init_db
+from .security import TOTP2FA, PasswordValidator
 
 BASE_DIR = Path(__file__).resolve().parent
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"}
@@ -324,11 +335,28 @@ def create_app():
         return render_template("admin_login.html", title="Admin login", nav_items=[], error=None, settings=settings)
 
     @app.post("/admin/login")
-    async def admin_login_post(request: Request, email: str = Form(...), password: str = Form(...)):
+    async def admin_login_post(request: Request, email: str = Form(...), password: str = Form(...), db=Depends(get_db)):
         admin_email, admin_password = get_admin_credentials()
-        if email == admin_email and password == admin_password:
-            login_user(request)
+        
+        # Check database first
+        admin = crud.get_admin_by_email(db, email)
+        if admin and verify_password(password, admin.password_hash):
+            login_user(request, email)
             return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
+        
+        # Fall back to environment credentials
+        if email == admin_email and password == admin_password:
+            # Create admin user in database if they don't exist
+            if not admin:
+                admin = models.AdminUser(
+                    email=admin_email,
+                    password_hash=get_password_hash(admin_password)
+                )
+                db.add(admin)
+                db.commit()
+            login_user(request, admin_email)
+            return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
+        
         return render_template("admin_login.html", title="Admin login", nav_items=[], error="Invalid credentials", settings=settings)
 
     @app.get("/admin/logout")
@@ -502,6 +530,131 @@ def create_app():
             site_config=crud.get_site_settings(db),
             uploads=crud.list_uploads(db),
             message="Settings saved.",
+            settings=settings,
+        )
+
+    @app.get("/admin/user-settings", response_class=HTMLResponse)
+    def admin_user_settings(request: Request, db=Depends(get_db)):
+        require_admin(request)
+        admin_email = request.session.get("admin_email")
+        if not admin_email:
+            # Get from environment if not in session
+            admin_email, _ = get_admin_credentials()
+        
+        admin = crud.get_admin_by_email(db, admin_email)
+        if not admin:
+            admin = models.AdminUser(email=admin_email, password_hash="")
+        
+        return render_template(
+            "admin_user_settings.html",
+            title="User Settings",
+            nav_items=[],
+            two_fa_enabled=admin.totp_enabled if admin else False,
+            show_2fa_setup=False,
+            message=None,
+            error=None,
+            settings=settings,
+        )
+
+    @app.post("/admin/user-settings", response_class=HTMLResponse)
+    async def admin_user_settings_update(
+        request: Request,
+        section: str = Form(...),
+        current_password: str = Form(""),
+        new_password: str = Form(""),
+        confirm_password: str = Form(""),
+        password: str = Form(""),
+        token: str = Form(""),
+        db=Depends(get_db),
+    ):
+        require_admin(request)
+        admin_email = request.session.get("admin_email")
+        if not admin_email:
+            admin_email, _ = get_admin_credentials()
+        
+        admin = crud.get_admin_by_email(db, admin_email)
+        if not admin:
+            admin = models.AdminUser(email=admin_email, password_hash=get_password_hash(get_admin_credentials()[1]))
+            db.add(admin)
+            db.commit()
+            db.refresh(admin)
+        
+        message = None
+        error = None
+        show_2fa_setup = False
+        qr_code = None
+        totp_secret = None
+        backup_codes = None
+
+        if section == "password":
+            # Verify current password
+            if not verify_password(current_password, admin.password_hash):
+                error = "Current password is incorrect"
+            elif new_password != confirm_password:
+                error = "Passwords do not match"
+            elif not new_password:
+                error = "New password cannot be empty"
+            else:
+                # Validate password strength
+                is_valid, error_msg = PasswordValidator.validate(new_password)
+                if not is_valid:
+                    error = error_msg
+                else:
+                    # Update password
+                    admin.password_hash = get_password_hash(new_password)
+                    db.commit()
+                    message = "Password updated successfully"
+
+        elif section == "setup-2fa":
+            if admin.totp_enabled:
+                error = "2FA is already enabled"
+            else:
+                # Generate new secret
+                provisioning_uri, codes = setup_2fa(db, admin)
+                qr_code = TOTP2FA.get_qr_code(provisioning_uri)
+                totp_secret = admin.totp_secret
+                backup_codes = codes
+                show_2fa_setup = True
+                request.session["2fa_setup_in_progress"] = True
+
+        elif section == "verify-2fa":
+            if not request.session.get("2fa_setup_in_progress"):
+                error = "2FA setup not initiated"
+            elif not admin.totp_secret:
+                error = "2FA secret not found"
+            elif not token:
+                error = "Please enter a 6-digit code"
+            elif not verify_2fa_setup(db, admin, token):
+                error = "Invalid code. Please try again"
+            else:
+                request.session.pop("2fa_setup_in_progress", None)
+                message = "Two-Factor Authentication enabled successfully!"
+                # Re-fetch admin to get updated 2FA status
+                db.refresh(admin)
+
+        elif section == "disable-2fa":
+            if not verify_password(password, admin.password_hash):
+                error = "Password is incorrect"
+            elif not admin.totp_enabled:
+                error = "2FA is not currently enabled"
+            else:
+                admin.totp_enabled = False
+                admin.totp_secret = None
+                admin.backup_codes = None
+                db.commit()
+                message = "Two-Factor Authentication disabled"
+
+        return render_template(
+            "admin_user_settings.html",
+            title="User Settings",
+            nav_items=[],
+            two_fa_enabled=admin.totp_enabled if admin else False,
+            show_2fa_setup=show_2fa_setup,
+            qr_code=qr_code,
+            totp_secret=totp_secret,
+            backup_codes=backup_codes,
+            message=message,
+            error=error,
             settings=settings,
         )
 

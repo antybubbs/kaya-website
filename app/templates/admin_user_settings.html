@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="admin-screen container">
+  <div class="admin-panel editor-layout">
+    <div>
+      {% include "admin_nav.html" %}
+      <span class="eyebrow">Account</span>
+      <h1>User Settings</h1>
+      {% if message %}<p class="message">{{ message }}</p>{% endif %}
+      {% if error %}<p class="error-message">{{ error }}</p>{% endif %}
+
+      <div class="settings-section">
+        <h2>Change Password</h2>
+        <form method="post" action="/admin/user-settings" class="editor-form">
+          <input type="hidden" name="section" value="password">
+          
+          <label for="current_password">Current Password</label>
+          <input id="current_password" type="password" name="current_password" required />
+
+          <label for="new_password">New Password</label>
+          <input id="new_password" type="password" name="new_password" required />
+          <p class="help-text">Minimum 12 characters, with uppercase letters, numbers, and special characters.</p>
+
+          <label for="confirm_password">Confirm New Password</label>
+          <input id="confirm_password" type="password" name="confirm_password" required />
+
+          <div class="form-actions">
+            <button class="button button-primary" type="submit">Update Password</button>
+          </div>
+        </form>
+      </div>
+
+      <hr style="margin: 32px 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.14);">
+
+      <div class="settings-section">
+        <h2>Two-Factor Authentication</h2>
+        
+        {% if two_fa_enabled %}
+          <p class="success-text">✓ Two-Factor Authentication is <strong>enabled</strong></p>
+          
+          <form method="post" action="/admin/user-settings" class="editor-form">
+            <input type="hidden" name="section" value="disable-2fa">
+            
+            <label for="password_for_2fa">Enter your password to disable 2FA:</label>
+            <input id="password_for_2fa" type="password" name="password" required />
+            
+            <div class="form-actions">
+              <button class="button button-secondary" type="submit">Disable 2FA</button>
+            </div>
+          </form>
+        {% else %}
+          <p>Two-Factor Authentication is not enabled. Enable it to add an extra layer of security to your account.</p>
+          
+          <form method="post" action="/admin/user-settings" class="editor-form">
+            <input type="hidden" name="section" value="setup-2fa">
+            
+            <div class="form-actions">
+              <button class="button button-primary" type="submit">Enable 2FA</button>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+
+      {% if show_2fa_setup %}
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.14);">
+        
+        <div class="settings-section">
+          <h2>Setup Two-Factor Authentication</h2>
+          <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.):</p>
+          
+          <div style="background: white; padding: 16px; border-radius: 8px; width: fit-content; margin: 16px 0;">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width: 256px; height: 256px;">
+          </div>
+
+          <p><strong>Or enter this code manually:</strong></p>
+          <code style="display: block; padding: 12px; background: rgba(79, 126, 255, 0.1); border-radius: 6px; margin: 12px 0; font-family: monospace; letter-spacing: 0.1em;">{{ totp_secret }}</code>
+
+          <form method="post" action="/admin/user-settings" class="editor-form">
+            <input type="hidden" name="section" value="verify-2fa">
+            
+            <label for="totp_token">Enter the 6-digit code from your authenticator app:</label>
+            <input id="totp_token" type="text" name="token" maxlength="6" pattern="\d{6}" placeholder="000000" required />
+            
+            <div class="form-actions">
+              <button class="button button-primary" type="submit">Verify and Enable</button>
+            </div>
+          </form>
+        </div>
+
+        {% if backup_codes %}
+          <hr style="margin: 32px 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.14);">
+          
+          <div class="settings-section">
+            <h2>Backup Codes</h2>
+            <p><strong>Save these codes in a safe place.</strong> You can use them to access your account if you lose access to your authenticator app.</p>
+            
+            <div style="background: rgba(255, 193, 7, 0.1); padding: 16px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 16px 0;">
+              <code style="display: block; white-space: pre-wrap; font-family: monospace; line-height: 1.8;">{% for code in backup_codes %}{{ code }}
+{% endfor %}</code>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .help-text {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+  
+  .success-text {
+    color: #4ade80;
+    font-size: 0.95rem;
+  }
+  
+  .error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #ef4444;
+    color: #fca5a5;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  
+  .message {
+    background: rgba(74, 222, 128, 0.1);
+    border-left: 4px solid #4ade80;
+    color: #86efac;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  
+  .settings-section {
+    margin-bottom: 24px;
+  }
+</style>
+{% endblock %}
