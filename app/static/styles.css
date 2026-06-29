@@ -779,8 +779,8 @@ tbody tr:hover {
 }
 
 .brand-compact img {
-  width: 42px;
-  height: 42px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   filter: drop-shadow(0 7px 12px rgba(0, 0, 0, 0.35));
 }
