@@ -7,6 +7,7 @@ DEFAULT_SITE_SETTINGS = {
     "header_logo_url": "/static/brand/kaya-icon.svg",
     "maintenance_enabled": "false",
     "maintenance_message": "Kaya is currently undergoing maintenance. Please check back shortly.",
+    "home_content": '<span class="eyebrow">Command your self-hosted infrastructure</span>\n<h1>One private operations console for the systems you run.</h1>\n<p>Kaya brings servers, services, remote access, runbooks, licences, assets and operational history into a calm self-hosted control plane.</p>\n<div class="hero-actions">\n  <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>\n  <a class="button button-secondary" href="/install">Get Started</a>\n  <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>\n</div>',
 }
 
 

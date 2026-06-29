@@ -478,6 +478,7 @@ def create_app():
         header_logo_url: str = Form(""),
         maintenance_enabled: bool = Form(False),
         maintenance_message: str = Form(""),
+        home_content: str = Form(""),
         logo_image: UploadFile | None = File(None),
         header_logo_image: UploadFile | None = File(None),
         db=Depends(get_db),
@@ -493,6 +494,7 @@ def create_app():
         crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-icon.svg")
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
+        crud.set_site_setting(db, "home_content", home_content or "<h2>Welcome</h2><p>Edit this content in Settings.</p>")
         return render_template(
             "admin_settings.html",
             title="Site settings",
