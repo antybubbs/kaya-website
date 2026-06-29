@@ -128,7 +128,8 @@ class TOTP2FA:
         
         img = qr.make_image(fill_color="black", back_color="white")
         buffer = BytesIO()
-        img.save(buffer, format="PNG")
+        img.save(buffer)
+        buffer.seek(0)
         return buffer.getvalue()
     
     @staticmethod
