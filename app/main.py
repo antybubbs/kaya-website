@@ -345,7 +345,7 @@ def create_app():
             login_user(request, email)
             return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
         
-        # Fall back to environment credentials
+        # Fall back to environment credentials (passwords are truncated to 72 bytes in get_password_hash)
         if email == admin_email and password == admin_password:
             # Get or create admin user in database
             admin = get_or_create_admin_user(db)

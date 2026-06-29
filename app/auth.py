@@ -14,10 +14,14 @@ serializer = URLSafeTimedSerializer(settings.secret_key)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # Truncate to 72 bytes for bcrypt compatibility
+    plain_password = plain_password[:72] if plain_password else ""
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
+    # Truncate to 72 bytes for bcrypt compatibility
+    password = password[:72] if password else "changeme"
     return pwd_context.hash(password)
 
 
@@ -33,11 +37,9 @@ def get_or_create_admin_user(db: Session) -> models.AdminUser:
     ).first()
     
     if not admin:
-        # Truncate password to 72 bytes for bcrypt compatibility
-        admin_password = settings.admin_password[:72] if settings.admin_password else "changeme"
         admin = models.AdminUser(
             email=settings.admin_email,
-            password_hash=get_password_hash(admin_password),
+            password_hash=get_password_hash(settings.admin_password),
         )
         db.add(admin)
         db.commit()
