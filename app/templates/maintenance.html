@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kaya maintenance</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/static/brand/kaya-favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="maintenance-screen">
+      <section class="maintenance-panel">
+        <img src="{{ site_config.site_logo_url }}" alt="Kaya" />
+        <span class="eyebrow">Maintenance mode</span>
+        <h1>We’ll be back shortly.</h1>
+        <p>{{ site_config.maintenance_message }}</p>
+        <a class="button button-secondary" href="/admin">Admin sign in</a>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="admin-screen container">
+  <div class="admin-panel editor-layout">
+    <div>
+      {% include "admin_nav.html" %}
+      <span class="eyebrow">Site</span>
+      <h1>Settings</h1>
+      {% if message %}<p class="message">{{ message }}</p>{% endif %}
+      <form method="post" action="/admin/settings" enctype="multipart/form-data" class="editor-form">
+        <label for="site_logo_url">Hero and footer logo URL</label>
+        <input id="site_logo_url" type="text" name="site_logo_url" value="{{ site_config.site_logo_url }}" />
+
+        <label for="logo_image">Upload hero/footer logo</label>
+        <input id="logo_image" type="file" name="logo_image" accept="image/*" />
+
+        <label for="header_logo_url">Header logo URL</label>
+        <input id="header_logo_url" type="text" name="header_logo_url" value="{{ site_config.header_logo_url }}" />
+
+        <label for="header_logo_image">Upload header logo</label>
+        <input id="header_logo_image" type="file" name="header_logo_image" accept="image/*" />
+
+        <label class="checkbox-label"><input type="checkbox" name="maintenance_enabled" {% if site_config.maintenance_enabled %}checked{% endif %} /> Enable maintenance mode</label>
+
+        <label for="maintenance_message">Maintenance message</label>
+        <textarea id="maintenance_message" name="maintenance_message" rows="4">{{ site_config.maintenance_message }}</textarea>
+
+        <div class="form-actions">
+          <button class="button button-primary" type="submit">Save settings</button>
+          <a class="button button-secondary" href="/">View site</a>
+        </div>
+      </form>
+    </div>
+    <aside class="editor-side">
+      <h2>Logo preview</h2>
+      <div class="settings-preview-logo"><img src="{{ site_config.site_logo_url }}" alt="Current site logo" /></div>
+      <h2>Upload library</h2>
+      <p>Paste an upload path into either logo URL field, or upload a new image here.</p>
+      <div class="upload-list compact-list">
+        {% for upload in uploads[:10] %}
+        <div><img src="/uploads/{{ upload.filename }}" alt="" /><code>/uploads/{{ upload.filename }}</code></div>
+        {% else %}
+        <p>No uploads yet.</p>
+        {% endfor %}
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

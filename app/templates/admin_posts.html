@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="admin-screen container">
+  <div class="admin-panel">
+    {% include "admin_nav.html" %}
+    <header class="admin-panel-header">
+      <div><span class="eyebrow">News</span><h1>Updates</h1></div>
+      <a class="button button-primary" href="/admin/posts/new">New update</a>
+    </header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Slug</th><th>Published</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+          {% for post in posts %}
+          <tr>
+            <td>{{ post.title }}</td>
+            <td>/blog/{{ post.slug }}</td>
+            <td>{{ "Yes" if post.published else "No" }}</td>
+            <td>{{ post.published_at.strftime('%d %b %Y') }}</td>
+            <td class="table-actions">
+              <a class="button button-ghost" href="/admin/posts/{{ post.id }}/edit">Edit</a>
+              <form method="post" action="/admin/posts/{{ post.id }}/delete" class="inline-form" onsubmit="return confirm('Delete this update?');">
+                <button class="button button-danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5">No updates yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

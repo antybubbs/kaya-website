@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="content container">
+  <div class="section-heading compact-heading">
+    <span class="eyebrow">Project updates</span>
+    <h1>Kaya updates</h1>
+    <p>Release notes, implementation notes and self-hosted infrastructure writing.</p>
+  </div>
+  <div class="post-grid">
+    {% for post in posts %}
+    <article class="post-card">
+      <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%d %b %Y') }}</time>
+      <h2><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h2>
+      <p>{{ post.excerpt }}</p>
+    </article>
+    {% else %}
+    <p>No updates published yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
