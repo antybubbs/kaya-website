@@ -17,7 +17,7 @@
     <div class="page-shell">
       <header class="site-header">
         <div class="container header-inner">
-          <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-icon.svg' }}" alt="" /><span>KAYA</span></a>
+          <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-icon.svg' }}" alt="Kaya" /></a>
           <nav class="site-nav" aria-label="Main navigation">
             {% for item in nav_items %}
             <a class="nav-link" href="/{{ item.slug }}">{{ item.title }}</a>

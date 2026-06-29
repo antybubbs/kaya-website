@@ -8,6 +8,22 @@ def normalize_slug(value: str) -> str:
     return (value or "").strip().strip("/").lower().replace(" ", "-")
 
 
+class AdminUser(Base):
+    __tablename__ = "admin_users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(200), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    totp_secret = Column(String(32), nullable=True)  # Base32 encoded secret for 2FA
+    backup_codes = Column(Text, nullable=True)  # JSON list of backup codes
+    totp_enabled = Column(Boolean, default=False, nullable=False)
+    last_login = Column(DateTime, nullable=True)
+    failed_login_attempts = Column(Integer, default=0, nullable=False)
+    locked_until = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
 class Page(Base):
     __tablename__ = "pages"
 

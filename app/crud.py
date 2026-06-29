@@ -10,6 +10,21 @@ DEFAULT_SITE_SETTINGS = {
 }
 
 
+# Admin user operations
+def get_admin_by_email(db: Session, email: str):
+    return db.scalar(select(models.AdminUser).where(models.AdminUser.email == email))
+
+
+def get_or_create_admin(db: Session, email: str, password_hash: str):
+    admin = get_admin_by_email(db, email)
+    if not admin:
+        admin = models.AdminUser(email=email, password_hash=password_hash)
+        db.add(admin)
+        db.commit()
+        db.refresh(admin)
+    return admin
+
+
 def get_page_by_slug(db: Session, slug: str):
     return db.scalar(select(models.Page).where(models.Page.slug == models.normalize_slug(slug)))
 

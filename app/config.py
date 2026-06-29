@@ -18,7 +18,16 @@ class Settings(BaseSettings):
     kaya_version: str = "v0.19.1"
     database_url: str = f"sqlite:///{BASE_DIR / 'data' / 'website.db'}"
     uploads_dir: Path = BASE_DIR / "uploads"
-
+    
+    # Security settings
+    enable_2fa: bool = True
+    require_2fa: bool = False  # Force 2FA for all admins
+    max_login_attempts: int = 5
+    login_attempt_window: int = 300  # seconds
+    account_lockout_duration: int = 900  # seconds
+    session_timeout: int = 3600  # seconds (1 hour)
+    cors_origins: str = "*"  # Restrict in production
+    
     class Config:
         env_file = BASE_DIR / ".env"
         env_file_encoding = "utf-8"

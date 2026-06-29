@@ -11,5 +11,7 @@ markdown==3.10.2
 bleach==6.1.0
 pydantic==2.8.0
 pydantic-settings==2.4.0
+pyotp==2.9.0
+qrcode==7.4.2
 
 
