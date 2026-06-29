@@ -531,14 +531,9 @@ def create_app():
     @app.get("/admin/user-settings", response_class=HTMLResponse)
     def admin_user_settings(request: Request, db=Depends(get_db)):
         require_admin(request)
-        admin_email = request.session.get("admin_email")
-        if not admin_email:
-            # Get from environment if not in session
-            admin_email, _ = get_admin_credentials()
         
-        admin = crud.get_admin_by_email(db, admin_email)
-        if not admin:
-            admin = models.AdminUser(email=admin_email, password_hash="")
+        # Get or create admin user - handles password hashing safely
+        admin = get_or_create_admin_user(db)
         
         return render_template(
             "admin_user_settings.html",
