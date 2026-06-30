@@ -1,6 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 import re
+import base64
 
 import bleach
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile, status
@@ -597,7 +598,8 @@ def create_app():
             else:
                 # Generate new secret
                 provisioning_uri, codes = setup_2fa(db, admin)
-                qr_code = TOTP2FA.get_qr_code(provisioning_uri)
+                qr_code_bytes = TOTP2FA.get_qr_code(provisioning_uri)
+                qr_code = base64.b64encode(qr_code_bytes).decode()
                 totp_secret = admin.totp_secret
                 backup_codes = codes
                 show_2fa_setup = True
