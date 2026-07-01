@@ -149,6 +149,9 @@ def common_context(db=None, **context):
 
 
 def render_template(template_name: str, **context):
+    if "site_config" not in context:
+        with SessionLocal() as db:
+            context["site_config"] = crud.get_site_settings(db)
     context.setdefault("release_versions", get_release_versions())
     template = env.get_template(template_name)
     return HTMLResponse(template.render(**context))

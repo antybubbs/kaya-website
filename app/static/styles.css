@@ -226,13 +226,11 @@ button, input, textarea { font: inherit; }
 }
 
 .release-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  display: block;
 }
 
 .release-item strong {
+  margin-left: 4px;
   color: #8ec5ff;
   font-weight: 500;
 }
