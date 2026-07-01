@@ -18,33 +18,28 @@ A standalone Docker-hosted marketing website for [Kaya](https://github.com/antyb
 ## Quick start
 
 ```bash
-cp .env.example .env
-# edit .env before public deployment
 docker compose up -d --build
 ```
 
 Open `http://localhost:8090`.
 
-Admin defaults, unless changed in `.env`:
+On first visit to `/admin`, you will be redirected to a setup screen to create the initial admin account.
 
-```text
-Email: admin@kaya.local
-Password: changeme
-```
-
-Change `SECRET_KEY`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` before exposing the site.
+The session secret is generated automatically on first boot and persisted in the data volume.
 
 ## Configuration
 
-Environment variables:
+No environment variables are required for a standard install.
+
+Optional environment variables:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `WEBSITE_PORT` | `8090` | Container and host port |
+| `WEBSITE_PORT` | `8090` | Uvicorn bind port inside the container |
 | `BASE_URL` | `http://localhost:8090` | Public site URL |
-| `SECRET_KEY` | compose fallback | Session signing secret |
-| `ADMIN_EMAIL` | `admin@kaya.local` | Admin login email |
-| `ADMIN_PASSWORD` | `changeme` | Admin login password |
+| `SECRET_KEY` | auto-generated at first run | Session signing secret |
+| `ADMIN_EMAIL` | empty | Optional bootstrap admin email |
+| `ADMIN_PASSWORD` | empty | Optional bootstrap admin password |
 | `ALLOWED_HOSTS` | `*` | Comma-separated trusted hosts |
 | `SESSION_COOKIE_SECURE` | `false` | Set `true` behind HTTPS |
 | `GITHUB_URL` | Kaya GitHub repo | Header/footer/project links |
@@ -77,6 +72,39 @@ docker compose up -d --build
 ```
 
 The SQLite database and uploads remain in Docker volumes.
+
+## Install from GHCR (Main or Dev Branch)
+
+The publish workflow tags images by branch name, so pushing branch `dev2.0.0` publishes:
+
+```text
+ghcr.io/antybubbs/kaya-website:dev2.0.0
+```
+
+Example `docker-compose.yml` service using GHCR image tags:
+
+```yaml
+services:
+  website:
+    image: ghcr.io/antybubbs/kaya-website:dev2.0.0
+    ports:
+      - "8090:8090"
+    volumes:
+      - kaya_website_data:/app/data
+      - kaya_website_uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  kaya_website_data:
+  kaya_website_uploads:
+```
+
+Then deploy a dev branch image:
+
+```bash
+docker compose pull
+docker compose up -d
+```
 
 ## Backup
 
@@ -131,7 +159,6 @@ Install dependencies locally:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-copy .env.example .env
 uvicorn app.main:app --reload --port 8090
 ```
 

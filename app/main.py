@@ -16,7 +16,6 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from . import crud, models, schemas
 from .auth import (
-    get_admin_credentials,
     login_user,
     logout_user,
     require_admin,
@@ -51,6 +50,10 @@ def get_db():
 
 def get_nav_items(db):
     return crud.list_pages(db, only_published=True, navigation_only=True)
+
+
+def has_admin_users(db) -> bool:
+    return db.scalar(select(models.AdminUser.id)) is not None
 
 
 def common_context(db=None, **context):
@@ -331,28 +334,90 @@ def create_app():
         )
 
     @app.get("/admin", response_class=HTMLResponse)
-    def admin_login(request: Request):
+    def admin_login(request: Request, db=Depends(get_db)):
+        if not has_admin_users(db):
+            return RedirectResponse(url="/admin/setup", status_code=status.HTTP_302_FOUND)
         if request.session.get("admin_authenticated"):
             return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
         return render_template("admin_login.html", title="Admin login", nav_items=[], error=None, settings=settings)
 
+    @app.get("/admin/setup", response_class=HTMLResponse)
+    def admin_setup(request: Request, db=Depends(get_db)):
+        if has_admin_users(db):
+            return RedirectResponse(url="/admin", status_code=status.HTTP_302_FOUND)
+        return render_template(
+            "admin_setup.html",
+            title="Admin setup",
+            nav_items=[],
+            error=None,
+            message="Create the first admin account to finish setup.",
+            settings=settings,
+        )
+
+    @app.post("/admin/setup")
+    async def admin_setup_post(
+        request: Request,
+        email: str = Form(...),
+        password: str = Form(...),
+        confirm_password: str = Form(...),
+        db=Depends(get_db),
+    ):
+        if has_admin_users(db):
+            return RedirectResponse(url="/admin", status_code=status.HTTP_302_FOUND)
+
+        if password != confirm_password:
+            return render_template(
+                "admin_setup.html",
+                title="Admin setup",
+                nav_items=[],
+                error="Passwords do not match",
+                message=None,
+                settings=settings,
+            )
+
+        valid, validation_error = PasswordValidator.validate(password)
+        if not valid:
+            return render_template(
+                "admin_setup.html",
+                title="Admin setup",
+                nav_items=[],
+                error=validation_error,
+                message=None,
+                settings=settings,
+            )
+
+        admin = models.AdminUser(
+            email=email.strip().lower(),
+            password_hash=get_password_hash(password),
+        )
+        db.add(admin)
+        try:
+            db.commit()
+            db.refresh(admin)
+        except IntegrityError:
+            db.rollback()
+            return render_template(
+                "admin_setup.html",
+                title="Admin setup",
+                nav_items=[],
+                error="That email is already in use.",
+                message=None,
+                settings=settings,
+            )
+
+        login_user(request, admin.email)
+        return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
+
     @app.post("/admin/login")
     async def admin_login_post(request: Request, email: str = Form(...), password: str = Form(...), db=Depends(get_db)):
-        admin_email, admin_password = get_admin_credentials()
-        
-        # Check database first
+        if not has_admin_users(db):
+            return RedirectResponse(url="/admin/setup", status_code=status.HTTP_302_FOUND)
+
         admin = crud.get_admin_by_email(db, email)
         if admin and verify_password(password, admin.password_hash):
             login_user(request, email)
             return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
-        
-        # Fall back to environment credentials (passwords are truncated to 72 bytes in get_password_hash)
-        if email == admin_email and password == admin_password:
-            # Get or create admin user in database
-            admin = get_or_create_admin_user(db)
-            login_user(request, admin.email)
-            return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
-        
+
         return render_template("admin_login.html", title="Admin login", nav_items=[], error="Invalid credentials", settings=settings)
 
     @app.get("/admin/logout")
@@ -533,8 +598,9 @@ def create_app():
     def admin_user_settings(request: Request, db=Depends(get_db)):
         require_admin(request)
         
-        # Get or create admin user - handles password hashing safely
         admin = get_or_create_admin_user(db)
+        if not admin:
+            return RedirectResponse(url="/admin/setup", status_code=status.HTTP_302_FOUND)
         
         return render_template(
             "admin_user_settings.html",
@@ -559,12 +625,10 @@ def create_app():
         db=Depends(get_db),
     ):
         require_admin(request)
-        admin_email = request.session.get("admin_email")
-        if not admin_email:
-            admin_email, _ = get_admin_credentials()
-        
-        # Get or create admin user - handles password hashing safely
+
         admin = get_or_create_admin_user(db)
+        if not admin:
+            return RedirectResponse(url="/admin/setup", status_code=status.HTTP_302_FOUND)
         
         message = None
         error = None

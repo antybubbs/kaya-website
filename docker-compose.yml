@@ -2,18 +2,7 @@ services:
   website:
     build: .
     ports:
-      - "${WEBSITE_PORT:-8090}:${WEBSITE_PORT:-8090}"
-    environment:
-      WEBSITE_PORT: ${WEBSITE_PORT:-8090}
-      BASE_URL: ${BASE_URL:-http://localhost:8090}
-      SECRET_KEY: ${SECRET_KEY:-change-this-secret-before-production}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@kaya.local}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
-      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
-      GITHUB_URL: ${GITHUB_URL:-https://github.com/antybubbs/kaya}
-      DEMO_URL: ${DEMO_URL:-/demo}
-      KAYA_VERSION: ${KAYA_VERSION:-v0.19.1}
+      - "8090:8090"
     volumes:
       - kaya_website_data:/app/data
       - kaya_website_uploads:/app/uploads
