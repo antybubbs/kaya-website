@@ -281,6 +281,90 @@ th { color: var(--muted); font-size: 0.86rem; }
 .editor-side { position: sticky; top: 96px; }
 .editor-side h2 { margin-top: 0; font-size: 1rem; }
 .editor-side p { color: var(--muted); }
+.editor-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rich-editor {
+  display: grid;
+  gap: 10px;
+}
+.editor-mode-tabs,
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.editor-mode-tabs button,
+.editor-toolbar button,
+.button-small {
+  border: 1px solid rgba(255, 138, 0, 0.24);
+  border-radius: 7px;
+  background: rgba(24, 20, 15, 0.92);
+  color: #dce7f8;
+  cursor: pointer;
+  font-weight: 800;
+}
+.editor-mode-tabs button,
+.editor-toolbar button {
+  min-height: 34px;
+  padding: 7px 10px;
+}
+.editor-mode-tabs button.active,
+.editor-toolbar button:hover,
+.editor-mode-tabs button:hover {
+  border-color: rgba(255, 138, 0, 0.58);
+  background: rgba(255, 138, 0, 0.16);
+  color: #fff;
+}
+.visual-editor {
+  min-height: 460px;
+  padding: 18px;
+  overflow: auto;
+  border: 1px solid #2a303a;
+  border-radius: 8px;
+  background: #0d1117;
+  color: var(--text);
+}
+.visual-editor:focus {
+  border-color: rgba(255, 138, 0, 0.78);
+  outline: 2px solid rgba(255, 138, 0, 0.18);
+}
+.visual-editor:empty::before {
+  content: "Start writing your guide...";
+  color: var(--muted-2);
+}
+.visual-editor img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 16px 0;
+  border: 1px solid #2a303a;
+  border-radius: 8px;
+}
+.visual-editor pre {
+  white-space: pre-wrap;
+}
+.markdown-source {
+  min-height: 460px;
+  font-family: Consolas, "Liberation Mono", monospace;
+  line-height: 1.55;
+}
+.rich-editor[data-mode="visual"] .markdown-source {
+  display: none;
+}
+.rich-editor[data-mode="source"] .visual-editor,
+.rich-editor[data-mode="source"] .editor-toolbar {
+  display: none;
+}
+.button-small {
+  width: auto;
+  margin-top: 10px;
+  padding: 7px 9px;
+  font-size: 0.82rem;
+}
 .upload-form { display: flex; gap: 10px; align-items: center; }
 .upload-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .upload-card, .upload-list div { padding: 12px; }
