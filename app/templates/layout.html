@@ -17,7 +17,7 @@
     <div class="page-shell">
       <header class="site-header">
         <div class="container header-inner">
-          <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-icon.svg' }}" alt="Kaya" /></a>
+          <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya" /></a>
           <nav class="site-nav" aria-label="Main navigation">
             {% for item in nav_items %}
             <a class="nav-link" href="/{{ item.slug }}">{{ item.title }}</a>
@@ -54,7 +54,16 @@
           </div>
           <div>
             <h2>Release</h2>
-            <p>{{ settings.kaya_version }}</p>
+            <dl class="release-list">
+              <div class="release-item">
+                <dt>Kaya Website Version</dt>
+                <dd>{{ release_versions.website }}</dd>
+              </div>
+              <div class="release-item">
+                <dt>Kaya App Current version</dt>
+                <dd>{{ release_versions.app }}</dd>
+              </div>
+            </dl>
             <p>&copy; 2026 Kaya. Self-hosted and open-source.</p>
           </div>
         </div>

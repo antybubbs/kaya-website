@@ -21,6 +21,12 @@
         <label for="header_logo_image">Upload header logo</label>
         <input id="header_logo_image" type="file" name="header_logo_image" accept="image/*" />
 
+        <label for="home_hero_image_url">Homepage hero image URL</label>
+        <input id="home_hero_image_url" type="text" name="home_hero_image_url" value="{{ site_config.home_hero_image_url }}" />
+
+        <label for="home_hero_image">Upload homepage hero image</label>
+        <input id="home_hero_image" type="file" name="home_hero_image" accept="image/*" />
+
         <label class="checkbox-label"><input type="checkbox" name="maintenance_enabled" {% if site_config.maintenance_enabled %}checked{% endif %} /> Enable maintenance mode</label>
 
         <label for="maintenance_message">Maintenance message</label>
@@ -37,7 +43,7 @@
     </div>
     <aside class="editor-side">
       <h2>Upload library</h2>
-      <p>Paste an upload path into either logo URL field, or upload a new image here.</p>
+      <p>Paste an upload path into the logo or homepage image URL fields, or upload a new image here.</p>
       <div class="upload-list compact-list">
         {% for upload in uploads[:10] %}
         <div><img src="/uploads/{{ upload.filename }}" alt="" /><code>/uploads/{{ upload.filename }}</code></div>

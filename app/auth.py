@@ -4,6 +4,7 @@ from passlib.context import CryptContext
 from itsdangerous import URLSafeTimedSerializer
 from fastapi import Request, HTTPException, status
 from fastapi.responses import RedirectResponse
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from .config import settings
 from .security import TOTP2FA, check_rate_limit, record_login_attempt, clear_login_attempts, get_client_ip
@@ -26,25 +27,29 @@ def get_password_hash(password: str) -> str:
 
 
 def get_admin_credentials():
-    """Get admin credentials from environment."""
+    """Get optional bootstrap admin credentials from environment."""
     return settings.admin_email, settings.admin_password
 
 
-def get_or_create_admin_user(db: Session) -> models.AdminUser:
-    """Get admin user from database, creating if necessary."""
-    admin = db.query(models.AdminUser).filter(
-        models.AdminUser.email == settings.admin_email
-    ).first()
-    
-    if not admin:
-        admin = models.AdminUser(
-            email=settings.admin_email,
-            password_hash=get_password_hash(settings.admin_password),
-        )
-        db.add(admin)
-        db.commit()
-        db.refresh(admin)
-    
+def get_or_create_admin_user(db: Session) -> models.AdminUser | None:
+    """Get the first admin user.
+
+    If no admin exists and bootstrap credentials are configured, create one.
+    """
+    admin = db.scalar(select(models.AdminUser).order_by(models.AdminUser.id.asc()))
+    if admin:
+        return admin
+
+    if not settings.admin_email or not settings.admin_password:
+        return None
+
+    admin = models.AdminUser(
+        email=settings.admin_email,
+        password_hash=get_password_hash(settings.admin_password),
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
     return admin
 
 

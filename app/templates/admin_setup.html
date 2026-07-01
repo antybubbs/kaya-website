@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="admin-screen container">
+  <div class="auth-panel narrow-panel">
+    <span class="eyebrow">Admin Setup</span>
+    <h1>Create first admin</h1>
+    {% if message %}<p class="alert">{{ message }}</p>{% endif %}
+    {% if error %}<p class="alert alert-error">{{ error }}</p>{% endif %}
+    <form method="post" action="/admin/setup">
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" autocomplete="username" required />
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" autocomplete="new-password" required />
+      <label for="confirm_password">Confirm password</label>
+      <input id="confirm_password" type="password" name="confirm_password" autocomplete="new-password" required />
+      <button class="button button-primary" type="submit">Create admin</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

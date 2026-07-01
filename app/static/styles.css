@@ -213,7 +213,40 @@ button, input, textarea { font: inherit; }
 .footer-grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 24px; }
 .footer-grid h2 { margin: 0 0 10px; font-size: 0.9rem; color: #fff; }
 .footer-grid p, .footer-grid a { display: block; margin: 7px 0; color: var(--muted); }
-.footer-brand { margin-bottom: 12px; }
+.footer-brand { margin-bottom: 4px; }
+
+.footer-grid > div:first-child p {
+  margin-top: 4px;
+}
+
+.release-list {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+
+.release-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.release-item dt,
+.release-item dd {
+  margin: 0;
+}
+
+.release-item dt {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.release-item dd {
+  color: #8ec5ff;
+  font-weight: 500;
+  white-space: nowrap;
+}
 
 .admin-screen { padding: 42px 0 72px; }
 .auth-panel, .admin-panel { padding: 24px; }
@@ -699,7 +732,7 @@ tbody tr:hover {
 }
 
 .footer-full-logo {
-  width: min(430px, 100%);
+  width: min(215px, 100%);
 }
 
 @media (max-width: 1180px) {
@@ -805,6 +838,7 @@ tbody tr:hover {
 
 .hero-professional {
   padding: 74px 0 34px;
+  overflow: visible;
   background:
     radial-gradient(circle at 72% 34%, rgba(255, 138, 0, 0.11), transparent 28%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 55%);
@@ -824,9 +858,29 @@ tbody tr:hover {
 .hero-professional .hero-grid {
   width: min(1280px, calc(100% - 40px));
   display: grid;
-  grid-template-columns: minmax(0, 0.98fr) minmax(360px, 0.72fr);
+  grid-template-columns: minmax(0, 0.86fr) minmax(480px, 1.14fr);
   gap: 42px;
-  align-items: end;
+  align-items: center;
+}
+
+.hero-professional .hero-grid.hero-grid-image-only {
+  grid-template-columns: 1fr;
+  width: min(1320px, calc(100% - clamp(180px, 18vw, 320px)));
+  margin-inline: auto;
+}
+
+.hero-grid-image-only .hero-copy,
+.hero-grid-image-only .hero-stats {
+  display: none !important;
+}
+
+.hero-grid-image-only .hero-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 22px auto 0;
 }
 
 .hero-professional .hero-copy h1 {
@@ -840,10 +894,17 @@ tbody tr:hover {
   font-size: 1.08rem;
 }
 
+.hero-professional .hero-actions {
+  justify-content: center;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .hero-professional .hero-stats {
-  align-self: end;
-  grid-template-columns: 1fr;
-  margin: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 26px auto 0;
+  width: min(540px, 100%);
 }
 
 .hero-professional .hero-stats div {
@@ -853,18 +914,101 @@ tbody tr:hover {
   border-color: #2a303a;
 }
 
-.hero-shot-wrap {
-  width: min(1500px, calc(100% - 40px));
-  margin-top: 52px;
+.hero-product-shot {
+  position: relative;
+  margin-right: 0;
+  margin-top: -96px;
+  justify-self: end;
+  z-index: 1;
+  width: min(980px, 100%);
+  aspect-ratio: 16 / 9;
+  padding: 12px;
+  border: 1px solid rgba(255, 138, 0, 0.2);
+  border-radius: 20px;
+  background: linear-gradient(160deg, #12161d 0%, #0b0f15 56%, #080b10 100%);
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  overflow: visible;
+  transform: perspective(2200px) rotateY(-4deg) rotateX(0.8deg) rotateZ(0deg);
+  transform-origin: left center;
+  transition: transform 260ms ease, box-shadow 260ms ease;
+}
+
+.hero-grid-image-only .hero-product-shot {
+  justify-self: stretch;
+  margin-top: 0;
+  width: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+  transform: none;
+}
+
+.hero-grid-image-only .hero-product-shot:hover {
+  transform: none;
+}
+
+.hero-grid-image-only .hero-product-shot::before,
+.hero-grid-image-only .hero-product-shot::after {
+  content: none;
+}
+
+.hero-product-shot::before,
+.hero-product-shot::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.hero-product-shot::before {
+  left: 8%;
+  right: -6%;
+  bottom: -16%;
+  height: 42%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(255, 138, 0, 0.26) 0%, rgba(255, 138, 0, 0) 72%);
+  filter: blur(22px);
+}
+
+.hero-product-shot::after {
+  left: 6%;
+  right: 4%;
+  bottom: -14%;
+  height: 24%;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  filter: blur(24px);
+}
+
+.hero-product-shot:hover {
+  transform: perspective(2200px) rotateY(-2.5deg) rotateX(0.4deg) rotateZ(0deg) translateY(-9px);
+  box-shadow:
+    0 38px 100px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.045) inset;
 }
 
 .dashboard-screenshot {
   width: 100%;
-  max-width: none;
-  border: 1px solid #2a303a;
+  height: 100%;
+  object-fit: contain;
   border-radius: 12px;
+  border: 0;
   background: #080b10;
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+  box-shadow: none;
+  image-rendering: auto;
+}
+
+.hero-grid-image-only .dashboard-screenshot {
+  height: auto;
+  border-radius: 0;
+  background: transparent;
 }
 
 .logo-strip {
@@ -874,6 +1018,17 @@ tbody tr:hover {
 
 .section.container {
   width: min(1280px, calc(100% - 40px));
+}
+
+.home-memory-section .section-heading {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.home-memory-section .section-heading p {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 1180px) {
@@ -891,6 +1046,36 @@ tbody tr:hover {
 
   .hero-professional .hero-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero-professional .hero-grid.hero-grid-image-only {
+    width: min(1320px, calc(100% - 48px));
+  }
+
+  .hero-product-shot {
+    transform: none;
+    margin-top: 0;
+    justify-self: stretch;
+    width: 100%;
+    max-width: 920px;
+  }
+
+  .hero-professional .hero-actions,
+  .hero-professional .hero-stats {
+    margin-left: 0;
+  }
+
+  .hero-product-shot::before {
+    left: 10%;
+    right: 10%;
+    bottom: -10%;
+    height: 34%;
+  }
+
+  .hero-product-shot::after {
+    left: 12%;
+    right: 12%;
+    bottom: -10%;
   }
 
   .hero-professional .hero-stats {
@@ -911,12 +1096,15 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
-  .hero-shot-wrap,
   .hero-brand-row,
   .hero-professional .hero-grid,
   .section.container,
   .site-header .container {
     width: min(100% - 28px, 1280px);
+  }
+
+  .hero-product-shot {
+    aspect-ratio: 4 / 3;
   }
 }
 
