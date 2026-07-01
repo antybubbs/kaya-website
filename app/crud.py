@@ -34,7 +34,11 @@ def get_page_by_slug(db: Session, slug: str):
 
 
 def _sort_pages(items):
-    return sorted(items, key=lambda page: (page.sort_order if page.sort_order is not None else 1000, page.title.lower()))
+    def sort_key(item):
+        if isinstance(item, dict):
+            return (item.get("page_sort") or 1000, item.get("title", "").lower())
+        return (item.sort_order if item.sort_order is not None else 1000, item.title.lower())
+    return sorted(items, key=sort_key)
 
 
 def get_pages(db: Session, only_published: bool = True):
