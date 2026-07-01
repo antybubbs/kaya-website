@@ -54,10 +54,16 @@
           </div>
           <div>
             <h2>Release</h2>
-            <div class="release-list">
-              <p class="release-item"><span>Kaya Website Version</span><strong> {{ release_versions.website }}</strong></p>
-              <p class="release-item"><span>Kaya App Current version</span><strong> {{ release_versions.app }}</strong></p>
-            </div>
+            <dl class="release-list">
+              <div class="release-item">
+                <dt>Kaya Website Version</dt>
+                <dd>{{ release_versions.website }}</dd>
+              </div>
+              <div class="release-item">
+                <dt>Kaya App Current version</dt>
+                <dd>{{ release_versions.app }}</dd>
+              </div>
+            </dl>
             <p>&copy; 2026 Kaya. Self-hosted and open-source.</p>
           </div>
         </div>

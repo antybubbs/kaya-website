@@ -221,18 +221,31 @@ button, input, textarea { font: inherit; }
 
 .release-list {
   display: grid;
-  gap: 2px;
+  gap: 10px;
   margin: 10px 0 14px;
 }
 
 .release-item {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
 }
 
-.release-item strong {
-  margin-left: 4px;
+.release-item dt,
+.release-item dd {
+  margin: 0;
+}
+
+.release-item dt {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.release-item dd {
   color: #8ec5ff;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .admin-screen { padding: 42px 0 72px; }
