@@ -1020,6 +1020,14 @@ tbody tr:hover {
   width: min(1280px, calc(100% - 40px));
 }
 
+.band > .container {
+  width: min(1280px, calc(100% - 40px));
+}
+
+.band > .split-section {
+  padding: 62px 0;
+}
+
 .home-memory-section .section-heading {
   margin-left: auto;
   margin-right: auto;
@@ -1099,6 +1107,7 @@ tbody tr:hover {
   .hero-brand-row,
   .hero-professional .hero-grid,
   .section.container,
+  .band > .container,
   .site-header .container {
     width: min(100% - 28px, 1280px);
   }
