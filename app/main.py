@@ -754,17 +754,23 @@ def create_app():
             settings=settings,
         )
 
-    @app.post("/admin/settings", response_class=HTMLResponse)
-    async def admin_site_settings_update(
+    @app.get("/admin/homepage", response_class=HTMLResponse)
+    def admin_homepage(request: Request, db=Depends(get_db)):
+        require_admin(request)
+        return render_template(
+            "admin_homepage.html",
+            title="Homepage",
+            nav_items=[],
+            site_config=crud.get_site_settings(db),
+            uploads=crud.list_uploads(db),
+            message=None,
+            settings=settings,
+        )
+
+    @app.post("/admin/homepage", response_class=HTMLResponse)
+    async def admin_homepage_update(
         request: Request,
-        site_logo_url: str = Form(""),
-        header_logo_url: str = Form(""),
         home_hero_image_url: str = Form(""),
-        website_repo_url: str = Form(""),
-        app_repo_url: str = Form(""),
-        maintenance_enabled: bool = Form(False),
-        maintenance_message: str = Form(""),
-        home_content: str = Form(""),
         home_intro_eyebrow: str = Form(""),
         home_intro_title: str = Form(""),
         home_intro_body: str = Form(""),
@@ -777,29 +783,14 @@ def create_app():
         home_install_title: str = Form(""),
         home_install_body: str = Form(""),
         home_install_code: str = Form(""),
-        logo_image: UploadFile | None = File(None),
-        header_logo_image: UploadFile | None = File(None),
         home_hero_image: UploadFile | None = File(None),
         db=Depends(get_db),
     ):
         require_admin(request)
-        if logo_image and logo_image.filename:
-            uploaded_logo = await save_upload(logo_image, db)
-            site_logo_url = f"/uploads/{uploaded_logo.filename}"
-        if header_logo_image and header_logo_image.filename:
-            uploaded_header_logo = await save_upload(header_logo_image, db)
-            header_logo_url = f"/uploads/{uploaded_header_logo.filename}"
         if home_hero_image and home_hero_image.filename:
             uploaded_home_hero = await save_upload(home_hero_image, db)
             home_hero_image_url = f"/uploads/{uploaded_home_hero.filename}"
-        crud.set_site_setting(db, "site_logo_url", site_logo_url or "/static/brand/kaya-full-logo.svg")
-        crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "home_hero_image_url", home_hero_image_url or "/static/kaya-dashboard-screenshot.svg")
-        crud.set_site_setting(db, "website_repo_url", website_repo_url or settings.website_github_url)
-        crud.set_site_setting(db, "app_repo_url", app_repo_url or settings.github_url)
-        crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
-        crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
-        crud.set_site_setting(db, "home_content", home_content or "<h2>Welcome</h2><p>Edit this content in Settings.</p>")
         crud.set_site_setting(db, "home_intro_eyebrow", home_intro_eyebrow)
         crud.set_site_setting(db, "home_intro_title", home_intro_title)
         crud.set_site_setting(db, "home_intro_body", home_intro_body)
@@ -812,6 +803,42 @@ def create_app():
         crud.set_site_setting(db, "home_install_title", home_install_title)
         crud.set_site_setting(db, "home_install_body", home_install_body)
         crud.set_site_setting(db, "home_install_code", home_install_code)
+        return render_template(
+            "admin_homepage.html",
+            title="Homepage",
+            nav_items=[],
+            site_config=crud.get_site_settings(db),
+            uploads=crud.list_uploads(db),
+            message="Homepage saved.",
+            settings=settings,
+        )
+
+    @app.post("/admin/settings", response_class=HTMLResponse)
+    async def admin_site_settings_update(
+        request: Request,
+        site_logo_url: str = Form(""),
+        header_logo_url: str = Form(""),
+        website_repo_url: str = Form(""),
+        app_repo_url: str = Form(""),
+        maintenance_enabled: bool = Form(False),
+        maintenance_message: str = Form(""),
+        logo_image: UploadFile | None = File(None),
+        header_logo_image: UploadFile | None = File(None),
+        db=Depends(get_db),
+    ):
+        require_admin(request)
+        if logo_image and logo_image.filename:
+            uploaded_logo = await save_upload(logo_image, db)
+            site_logo_url = f"/uploads/{uploaded_logo.filename}"
+        if header_logo_image and header_logo_image.filename:
+            uploaded_header_logo = await save_upload(header_logo_image, db)
+            header_logo_url = f"/uploads/{uploaded_header_logo.filename}"
+        crud.set_site_setting(db, "site_logo_url", site_logo_url or "/static/brand/kaya-full-logo.svg")
+        crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
+        crud.set_site_setting(db, "website_repo_url", website_repo_url or settings.website_github_url)
+        crud.set_site_setting(db, "app_repo_url", app_repo_url or settings.github_url)
+        crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
+        crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
         return render_template(
             "admin_settings.html",
             title="Site settings",
