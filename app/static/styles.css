@@ -865,7 +865,7 @@ tbody tr:hover {
 
 .hero-professional .hero-grid.hero-grid-image-only {
   grid-template-columns: 1fr;
-  width: min(1500px, calc(100% - 40px));
+  width: 100%;
 }
 
 .hero-professional .hero-copy h1 {
@@ -924,11 +924,24 @@ tbody tr:hover {
   justify-self: stretch;
   margin-top: 0;
   width: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
   transform: none;
 }
 
 .hero-grid-image-only .hero-product-shot:hover {
-  transform: translateY(-6px);
+  transform: none;
+}
+
+.hero-grid-image-only .hero-product-shot::before,
+.hero-grid-image-only .hero-product-shot::after {
+  content: none;
 }
 
 .hero-product-shot::before,
@@ -977,6 +990,12 @@ tbody tr:hover {
   image-rendering: auto;
 }
 
+.hero-grid-image-only .dashboard-screenshot {
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+}
+
 .logo-strip {
   justify-content: center;
   padding-top: 16px;
@@ -1004,7 +1023,7 @@ tbody tr:hover {
   }
 
   .hero-professional .hero-grid.hero-grid-image-only {
-    width: min(100% - 28px, 1500px);
+    width: 100%;
   }
 
   .hero-product-shot {
