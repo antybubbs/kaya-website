@@ -865,11 +865,15 @@ tbody tr:hover {
 
 .hero-professional .hero-actions {
   justify-content: center;
+  width: fit-content;
+  margin-left: clamp(84px, 9vw, 190px);
 }
 
 .hero-professional .hero-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 26px 0 0;
+  width: min(540px, 100%);
+  margin-left: clamp(84px, 9vw, 190px);
 }
 
 .hero-professional .hero-stats div {
@@ -882,7 +886,7 @@ tbody tr:hover {
 .hero-product-shot {
   position: relative;
   margin-right: 0;
-  margin-top: -42px;
+  margin-top: -96px;
   justify-self: end;
   z-index: 1;
   width: min(980px, 100%);
@@ -978,6 +982,11 @@ tbody tr:hover {
     justify-self: stretch;
     width: 100%;
     max-width: 920px;
+  }
+
+  .hero-professional .hero-actions,
+  .hero-professional .hero-stats {
+    margin-left: 0;
   }
 
   .hero-product-shot::before {
