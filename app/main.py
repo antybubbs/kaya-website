@@ -409,8 +409,9 @@ async def save_upload(upload: UploadFile, db):
     return crud.create_upload(db, unique_name, upload.filename, upload.content_type, len(content))
 
 
-def build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order):
+def build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order, parent_id=None):
     return schemas.PageCreate(
+        parent_id=parent_id,
         title=title,
         slug=slug,
         meta_description=meta_description,
@@ -581,25 +582,31 @@ def create_app():
     @app.get("/admin/pages", response_class=HTMLResponse)
     def admin_pages(request: Request, db=Depends(get_db)):
         require_admin(request)
-        pages = crud.list_pages(db, only_published=False)
+        pages = crud.get_pages(db, only_published=False)
         return render_template("admin_pages.html", title="Pages", pages=pages, nav_items=[], settings=settings)
 
     @app.get("/admin/pages/new", response_class=HTMLResponse)
     def admin_new_page(request: Request, db=Depends(get_db)):
         require_admin(request)
-        return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), form_action="/admin/pages/new", nav_items=[], message=None, settings=settings)
+        pages = crud.get_pages(db, only_published=False)
+        return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages), form_action="/admin/pages/new", nav_items=[], message=None, settings=settings)
 
     @app.post("/admin/pages/new")
-    async def admin_create_page(request: Request, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), image: UploadFile | None = File(None), db=Depends(get_db)):
+    async def admin_create_page(request: Request, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), parent_id: int | None = Form(None), image: UploadFile | None = File(None), db=Depends(get_db)):
         require_admin(request)
-        page_in = build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order)
+        if parent_id is not None and db.get(models.Page, parent_id) is None:
+            pages = crud.get_pages(db, only_published=False)
+            return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages), form_action="/admin/pages/new", nav_items=[], message=None, error="Selected parent page was not found.", settings=settings)
+
+        page_in = build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order, parent_id=parent_id)
         try:
             crud.create_page(db, page_in)
             if image and image.filename:
                 await save_upload(image, db)
         except IntegrityError:
             db.rollback()
-            return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), form_action="/admin/pages/new", nav_items=[], message="A page with that slug already exists.", settings=settings)
+            pages = crud.get_pages(db, only_published=False)
+            return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages), form_action="/admin/pages/new", nav_items=[], message="A page with that slug already exists.", settings=settings)
         return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
 
     @app.get("/admin/pages/{page_id}/edit", response_class=HTMLResponse)
@@ -608,22 +615,30 @@ def create_app():
         page = db.get(models.Page, page_id)
         if not page:
             raise HTTPException(status_code=404, detail="Not found")
-        return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, settings=settings)
+        pages = crud.get_pages(db, only_published=False)
+        return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, settings=settings)
 
     @app.post("/admin/pages/{page_id}/edit")
-    async def admin_update_page(request: Request, page_id: int, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), image: UploadFile | None = File(None), db=Depends(get_db)):
+    async def admin_update_page(request: Request, page_id: int, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), parent_id: int | None = Form(None), image: UploadFile | None = File(None), db=Depends(get_db)):
         require_admin(request)
         page = db.get(models.Page, page_id)
         if not page:
             raise HTTPException(status_code=404, detail="Not found")
-        page_in = schemas.PageUpdate(**build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order).model_dump())
+        all_pages = crud.get_pages(db, only_published=False)
+        excluded_ids = crud.get_descendant_ids(all_pages, page.id)
+        if parent_id == page.id or (parent_id is not None and parent_id in excluded_ids):
+            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(all_pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, error="Please choose a different parent page.", settings=settings)
+        if parent_id is not None and db.get(models.Page, parent_id) is None:
+            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(all_pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, error="Selected parent page was not found.", settings=settings)
+
+        page_in = schemas.PageUpdate(**build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order, parent_id=parent_id).model_dump())
         try:
             crud.update_page(db, page, page_in)
             if image and image.filename:
                 await save_upload(image, db)
         except IntegrityError:
             db.rollback()
-            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message="A page with that slug already exists.", settings=settings)
+            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(all_pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message="A page with that slug already exists.", settings=settings)
         return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
 
     @app.post("/admin/pages/{page_id}/delete")
@@ -876,22 +891,24 @@ def create_app():
     @app.get("/{slug:path}", response_class=HTMLResponse)
     def public_page(request: Request, slug: str, db=Depends(get_db)):
         clean_slug = models.normalize_slug(slug)
-        page = crud.get_page_by_slug(db, clean_slug)
+        page = crud.get_page_by_path(db, clean_slug)
         if not page or not page.published:
             raise HTTPException(status_code=404, detail="Page not found")
 
-        if is_docs_slug(clean_slug):
-            docs_sidebar = build_docs_sidebar(crud.list_pages(db, only_published=True), clean_slug)
+        pages = crud.get_pages(db, only_published=True)
+        page_map = {item.id: item for item in pages}
+        has_children = any(item.parent_id == page.id for item in pages)
+        if page.parent_id is not None or has_children:
             return render_template(
-                "docs_page.html",
+                "page_hierarchy.html",
                 **common_context(
                     db,
                     title=page.title,
                     meta_description=page.meta_description,
                     page=page,
                     page_html=sanitize_html(page.content or ""),
-                    docs_sidebar=docs_sidebar,
-                    current_slug=clean_slug,
+                    page_tree=crud.build_page_tree(pages),
+                    current_path=crud.get_page_url(page, page_map),
                 ),
             )
 

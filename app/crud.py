@@ -33,6 +33,140 @@ def get_page_by_slug(db: Session, slug: str):
     return db.scalar(select(models.Page).where(models.Page.slug == models.normalize_slug(slug)))
 
 
+def _sort_pages(items):
+    return sorted(items, key=lambda page: (page.sort_order if page.sort_order is not None else 1000, page.title.lower()))
+
+
+def get_pages(db: Session, only_published: bool = True):
+    return list_pages(db, only_published=only_published)
+
+
+def get_descendant_ids(pages, page_id: int):
+    children_by_parent = {}
+    for page in pages:
+        children_by_parent.setdefault(page.parent_id, []).append(page)
+
+    descendants = set()
+    stack = [page_id]
+    while stack:
+        current_id = stack.pop()
+        for child in children_by_parent.get(current_id, []):
+            if child.id not in descendants:
+                descendants.add(child.id)
+                stack.append(child.id)
+    return descendants
+
+
+def get_page_path(page, page_map=None):
+    page_map = page_map or {}
+    segments = []
+    current = page
+    seen = set()
+
+    while current and current.id not in seen:
+        seen.add(current.id)
+        if current.slug:
+            segments.append(models.normalize_slug(current.slug))
+        current = page_map.get(current.parent_id)
+
+    return "/".join(reversed([segment for segment in segments if segment]))
+
+
+def get_page_url(page, page_map=None):
+    path = get_page_path(page, page_map=page_map)
+    return f"/{path}" if path else "/"
+
+
+def build_page_tree(pages):
+    page_map = {page.id: page for page in pages}
+    nodes = {}
+    roots = []
+
+    for page in pages:
+        if not page.slug:
+            continue
+        nodes[page.id] = {
+            "id": page.id,
+            "title": page.title,
+            "slug": page.slug,
+            "url": get_page_url(page, page_map),
+            "page_sort": page.sort_order,
+            "parent_id": page.parent_id,
+            "children": [],
+        }
+
+    for node in nodes.values():
+        parent_id = node["parent_id"]
+        if parent_id and parent_id in nodes:
+            nodes[parent_id]["children"].append(node)
+        else:
+            roots.append(node)
+
+    def sort_nodes(items):
+        for item in items:
+            item["children"] = sort_nodes(_sort_pages(item["children"]))
+        return items
+
+    return sort_nodes(_sort_pages(roots))
+
+
+def build_page_parent_options(pages, exclude_page_id: int | None = None):
+    excluded_ids = set()
+    if exclude_page_id is not None:
+        excluded_ids.add(exclude_page_id)
+        excluded_ids.update(get_descendant_ids(pages, exclude_page_id))
+
+    tree = build_page_tree([page for page in pages if page.id not in excluded_ids])
+    options = []
+
+    def walk(items, depth=0):
+        for item in items:
+            options.append({
+                "id": item["id"],
+                "title": item["title"],
+                "depth": depth,
+                "url": item["url"],
+            })
+            walk(item["children"], depth + 1)
+
+    walk(tree)
+    return options
+
+
+def get_page_by_path(db: Session, path: str, only_published: bool = True):
+    clean_path = models.normalize_slug(path)
+    pages = get_pages(db, only_published=only_published)
+
+    if not clean_path:
+        return next((page for page in pages if not page.slug), None)
+
+    page_map = {page.id: page for page in pages}
+    segments = [segment for segment in clean_path.split("/") if segment]
+
+    def descendants_for(parent_id):
+        return _sort_pages([page for page in pages if page.parent_id == parent_id])
+
+    roots = descendants_for(None)
+    for root in roots:
+        if models.normalize_slug(root.slug) != segments[0]:
+            continue
+
+        current = root
+        matched = True
+        for segment in segments[1:]:
+            children = descendants_for(current.id)
+            next_page = next((page for page in children if models.normalize_slug(page.slug) == segment), None)
+            if not next_page:
+                matched = False
+                break
+            current = next_page
+
+        if matched:
+            return current
+
+    return next((page for page in pages if models.normalize_slug(page.slug) == clean_path), None)
+
+
 def list_pages(db: Session, only_published: bool = True, navigation_only: bool = False):
     query = select(models.Page)
     if only_published:
@@ -61,6 +195,9 @@ def update_page(db: Session, page: models.Page, page_in: schemas.PageUpdate):
 
 
 def delete_page(db: Session, page: models.Page):
+    children = db.scalars(select(models.Page).where(models.Page.parent_id == page.id)).all()
+    for child in children:
+        child.parent_id = page.parent_id
     db.delete(page)
     db.commit()
 

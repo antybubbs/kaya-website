@@ -3,6 +3,7 @@ from typing import Optional
 
 
 class PageBase(BaseModel):
+    parent_id: Optional[int] = None
     title: str
     slug: str
     meta_description: Optional[str] = None

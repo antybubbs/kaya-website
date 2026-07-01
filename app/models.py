@@ -1,6 +1,6 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime
-from sqlalchemy.orm import validates
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import validates, relationship
 from .database import Base
 
 
@@ -28,6 +28,7 @@ class Page(Base):
     __tablename__ = "pages"
 
     id = Column(Integer, primary_key=True, index=True)
+    parent_id = Column(Integer, ForeignKey("pages.id"), nullable=True, index=True)
     title = Column(String(200), nullable=False)
     slug = Column(String(200), unique=True, nullable=False, index=True)
     meta_description = Column(String(300), nullable=True)
@@ -35,6 +36,7 @@ class Page(Base):
     published = Column(Boolean, default=False, nullable=False)
     show_in_navigation = Column(Boolean, default=False, nullable=False)
     sort_order = Column(Integer, default=100, nullable=False)
+    parent = relationship("Page", remote_side=[id], backref="children")
 
     @validates("slug")
     def validate_slug(self, key, value):

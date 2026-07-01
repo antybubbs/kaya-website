@@ -8,9 +8,18 @@
       <span class="eyebrow">Pages</span>
       <h1>{{ page and 'Edit page' or 'Create page' }}</h1>
       {% if message %}<p class="message">{{ message }}</p>{% endif %}
+      {% if error %}<p class="alert alert-error">{{ error }}</p>{% endif %}
       <form method="post" action="{{ form_action }}" enctype="multipart/form-data" class="editor-form">
         <label for="title">Title</label>
         <input id="title" type="text" name="title" value="{{ page.title if page else '' }}" required />
+
+        <label for="parent_id">Parent page</label>
+        <select id="parent_id" name="parent_id">
+          <option value="">Top level page</option>
+          {% for option in parent_options %}
+          <option value="{{ option.id }}" {% if page and page.parent_id == option.id %}selected{% endif %}>{{ ('— ' * option.depth) }}{{ option.title }}</option>
+          {% endfor %}
+        </select>
 
         <label for="slug">Slug</label>
         <input id="slug" type="text" name="slug" value="{{ page.slug if page else '' }}" placeholder="features" />

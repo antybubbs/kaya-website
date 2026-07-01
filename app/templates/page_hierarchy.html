@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% macro render_page_node(node, current_path, depth=0) -%}
+  {% set node_path = node.url.lstrip('/') %}
+  {% set is_current = current_path == node_path %}
+  {% set is_open = current_path == node_path or current_path.startswith(node_path + '/') %}
+  {% set has_children = node.children and node.children|length > 0 %}
+  <li class="docs-node depth-{{ depth }}{% if is_current %} active{% endif %}">
+    {% if has_children %}
+      <details class="docs-details" {% if is_open %}open{% endif %}>
+        <summary><a href="{{ node.url }}">{{ node.title }}</a></summary>
+        <ul>
+          {% for child in node.children %}
+            {{ render_page_node(child, current_path, depth + 1) }}
+          {% endfor %}
+        </ul>
+      </details>
+    {% else %}
+      <a href="{{ node.url }}">{{ node.title }}</a>
+    {% endif %}
+  </li>
+{%- endmacro %}
+
+{% block content %}
+<section class="content container docs-layout">
+  <aside class="docs-sidebar" aria-label="Site pages navigation">
+    <h2>Pages</h2>
+    <ul class="docs-tree">
+      {% for node in page_tree %}
+        {{ render_page_node(node, current_path) }}
+      {% endfor %}
+    </ul>
+  </aside>
+  <article class="page-content docs-content">
+    <p class="eyebrow">Kaya</p>
+    <h1>{{ page.title }}</h1>
+    <div class="markdown-body">{{ page_html | safe }}</div>
+  </article>
+</section>
+{% endblock %}
