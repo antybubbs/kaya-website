@@ -149,6 +149,7 @@ def common_context(db=None, **context):
 
 
 def render_template(template_name: str, **context):
+    context.setdefault("release_versions", get_release_versions())
     template = env.get_template(template_name)
     return HTMLResponse(template.render(**context))
 
