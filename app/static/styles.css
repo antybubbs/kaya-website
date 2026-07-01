@@ -868,12 +868,16 @@ tbody tr:hover {
   width: fit-content;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
+  left: calc(50vw - 50%);
 }
 
 .hero-professional .hero-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 26px auto 0;
   width: min(540px, 100%);
+  position: relative;
+  left: calc(50vw - 50%);
 }
 
 .hero-professional .hero-stats div {
@@ -987,6 +991,7 @@ tbody tr:hover {
   .hero-professional .hero-actions,
   .hero-professional .hero-stats {
     margin-left: 0;
+    left: 0;
   }
 
   .hero-product-shot::before {
