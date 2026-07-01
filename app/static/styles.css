@@ -877,9 +877,10 @@ tbody tr:hover {
 .hero-product-shot {
   position: relative;
   margin-right: 0;
+  margin-top: -26px;
   justify-self: end;
   z-index: 1;
-  width: min(920px, 100%);
+  width: min(980px, 100%);
   aspect-ratio: 16 / 9;
   padding: 12px;
   border: 1px solid rgba(255, 138, 0, 0.2);
@@ -889,7 +890,7 @@ tbody tr:hover {
     0 32px 90px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(255, 255, 255, 0.03) inset;
   overflow: visible;
-  transform: perspective(1600px) rotateY(-12deg) rotateX(4deg) rotateZ(-1deg);
+  transform: perspective(1800px) rotateY(-8deg) rotateX(2deg) rotateZ(-0.4deg);
   transform-origin: left center;
   transition: transform 260ms ease, box-shadow 260ms ease;
 }
@@ -923,7 +924,7 @@ tbody tr:hover {
 }
 
 .hero-product-shot:hover {
-  transform: perspective(1600px) rotateY(-8deg) rotateX(2.5deg) rotateZ(-0.6deg) translateY(-7px);
+  transform: perspective(1800px) rotateY(-6deg) rotateX(1.5deg) rotateZ(-0.2deg) translateY(-9px);
   box-shadow:
     0 38px 100px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.045) inset;
@@ -937,6 +938,9 @@ tbody tr:hover {
   border: 0;
   background: #080b10;
   box-shadow: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  image-rendering: auto;
 }
 
 .logo-strip {
@@ -967,6 +971,7 @@ tbody tr:hover {
 
   .hero-product-shot {
     transform: none;
+    margin-top: 0;
     justify-self: stretch;
     width: 100%;
     max-width: 920px;
