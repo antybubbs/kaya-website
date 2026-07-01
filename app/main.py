@@ -108,10 +108,18 @@ def fetch_latest_repo_version(owner: str, repo: str) -> str | None:
     return None
 
 
-def get_release_versions() -> dict[str, str]:
+def get_release_repo_urls(site_config: dict | None = None) -> dict[str, str]:
+    return {
+        "website": (site_config or {}).get("website_repo_url") or settings.website_github_url,
+        "app": (site_config or {}).get("app_repo_url") or settings.github_url,
+    }
+
+
+def get_release_versions(repo_urls: dict[str, str] | None = None) -> dict[str, str]:
+    repo_urls = repo_urls or get_release_repo_urls()
     repos = {
-        "website": parse_github_repo(settings.website_github_url),
-        "app": parse_github_repo(settings.github_url),
+        "website": parse_github_repo(repo_urls.get("website", "")),
+        "app": parse_github_repo(repo_urls.get("app", "")),
     }
     now = time.time()
     versions = {
@@ -144,7 +152,7 @@ def common_context(db=None, **context):
         context.setdefault("nav_items", get_nav_items(db))
         context.setdefault("site_config", crud.get_site_settings(db))
     context.setdefault("settings", settings)
-    context.setdefault("release_versions", get_release_versions())
+    context.setdefault("release_versions", get_release_versions(get_release_repo_urls(context.get("site_config"))))
     return context
 
 
@@ -152,7 +160,7 @@ def render_template(template_name: str, **context):
     if "site_config" not in context:
         with SessionLocal() as db:
             context["site_config"] = crud.get_site_settings(db)
-    context.setdefault("release_versions", get_release_versions())
+    context.setdefault("release_versions", get_release_versions(get_release_repo_urls(context.get("site_config"))))
     template = env.get_template(template_name)
     return HTMLResponse(template.render(**context))
 
@@ -654,6 +662,8 @@ def create_app():
         site_logo_url: str = Form(""),
         header_logo_url: str = Form(""),
         home_hero_image_url: str = Form(""),
+        website_repo_url: str = Form(""),
+        app_repo_url: str = Form(""),
         maintenance_enabled: bool = Form(False),
         maintenance_message: str = Form(""),
         home_content: str = Form(""),
@@ -675,6 +685,8 @@ def create_app():
         crud.set_site_setting(db, "site_logo_url", site_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "home_hero_image_url", home_hero_image_url or "/static/kaya-dashboard-screenshot.svg")
+        crud.set_site_setting(db, "website_repo_url", website_repo_url or settings.website_github_url)
+        crud.set_site_setting(db, "app_repo_url", app_repo_url or settings.github_url)
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
         crud.set_site_setting(db, "home_content", home_content or "<h2>Welcome</h2><p>Edit this content in Settings.</p>")

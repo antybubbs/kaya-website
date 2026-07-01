@@ -1168,3 +1168,11 @@ tbody tr:hover {
   max-width: 42ch;
   color: var(--muted);
 }
+
+.maintenance-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}

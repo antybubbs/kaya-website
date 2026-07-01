@@ -27,6 +27,12 @@
         <label for="home_hero_image">Upload homepage hero image</label>
         <input id="home_hero_image" type="file" name="home_hero_image" accept="image/*" />
 
+        <label for="website_repo_url">Website GitHub repository URL</label>
+        <input id="website_repo_url" type="url" name="website_repo_url" value="{{ site_config.website_repo_url }}" placeholder="https://github.com/antybubbs/kaya-website" />
+
+        <label for="app_repo_url">Kaya app GitHub repository URL</label>
+        <input id="app_repo_url" type="url" name="app_repo_url" value="{{ site_config.app_repo_url }}" placeholder="https://github.com/antybubbs/kaya" />
+
         <label class="checkbox-label"><input type="checkbox" name="maintenance_enabled" {% if site_config.maintenance_enabled %}checked{% endif %} /> Enable maintenance mode</label>
 
         <label for="maintenance_message">Maintenance message</label>
