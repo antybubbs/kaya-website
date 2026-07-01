@@ -239,6 +239,20 @@ def sanitize_html(content: str) -> str:
     return bleach.clean(raw_html, tags=allowed_tags, attributes=allowed_attrs, protocols=["http", "https", "mailto"], strip=True)
 
 
+def parse_homepage_items(value: str, fallback: str = ""):
+    items = []
+    source = value or fallback or ""
+    for line in source.splitlines():
+        if not line.strip():
+            continue
+        title, separator, body = line.partition("|")
+        items.append({
+            "title": title.strip(),
+            "body": body.strip() if separator else "",
+        })
+    return items
+
+
 def page_payload(title, slug, meta_description, content, order, nav=True):
     return {
         "title": title,
@@ -471,7 +485,18 @@ def create_app():
     @app.get("/", response_class=HTMLResponse)
     def public_home(request: Request, db=Depends(get_db)):
         posts = crud.list_posts(db, only_published=True)[:3]
-        return render_template("home.html", **common_context(db, title="Kaya", posts=posts))
+        site_config = crud.get_site_settings(db)
+        return render_template(
+            "home.html",
+            **common_context(
+                db,
+                title="Kaya",
+                posts=posts,
+                site_config=site_config,
+                home_features=parse_homepage_items(site_config.get("home_features", "")),
+                home_reasons=parse_homepage_items(site_config.get("home_reasons", "")),
+            ),
+        )
 
     @app.get("/blog", response_class=HTMLResponse)
     def public_blog(request: Request, db=Depends(get_db)):
@@ -740,6 +765,18 @@ def create_app():
         maintenance_enabled: bool = Form(False),
         maintenance_message: str = Form(""),
         home_content: str = Form(""),
+        home_intro_eyebrow: str = Form(""),
+        home_intro_title: str = Form(""),
+        home_intro_body: str = Form(""),
+        home_features: str = Form(""),
+        home_why_eyebrow: str = Form(""),
+        home_why_title: str = Form(""),
+        home_why_body: str = Form(""),
+        home_reasons: str = Form(""),
+        home_install_eyebrow: str = Form(""),
+        home_install_title: str = Form(""),
+        home_install_body: str = Form(""),
+        home_install_code: str = Form(""),
         logo_image: UploadFile | None = File(None),
         header_logo_image: UploadFile | None = File(None),
         home_hero_image: UploadFile | None = File(None),
@@ -763,6 +800,18 @@ def create_app():
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
         crud.set_site_setting(db, "home_content", home_content or "<h2>Welcome</h2><p>Edit this content in Settings.</p>")
+        crud.set_site_setting(db, "home_intro_eyebrow", home_intro_eyebrow)
+        crud.set_site_setting(db, "home_intro_title", home_intro_title)
+        crud.set_site_setting(db, "home_intro_body", home_intro_body)
+        crud.set_site_setting(db, "home_features", home_features)
+        crud.set_site_setting(db, "home_why_eyebrow", home_why_eyebrow)
+        crud.set_site_setting(db, "home_why_title", home_why_title)
+        crud.set_site_setting(db, "home_why_body", home_why_body)
+        crud.set_site_setting(db, "home_reasons", home_reasons)
+        crud.set_site_setting(db, "home_install_eyebrow", home_install_eyebrow)
+        crud.set_site_setting(db, "home_install_title", home_install_title)
+        crud.set_site_setting(db, "home_install_body", home_install_body)
+        crud.set_site_setting(db, "home_install_code", home_install_code)
         return render_template(
             "admin_settings.html",
             title="Site settings",

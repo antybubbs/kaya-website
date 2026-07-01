@@ -16,26 +16,16 @@
 
 <section class="section container home-memory-section">
   <div class="section-heading">
-    <span class="eyebrow">Your Infrastructure. Your Home.</span>
-    <h2>Welcome to Kaya.</h2>
-    <p>Keep asset records, access details, procedures and monitoring context close to the systems they describe.</p>
+    <span class="eyebrow">{{ site_config.home_intro_eyebrow }}</span>
+    <h2>{{ site_config.home_intro_title }}</h2>
+    <p>{{ site_config.home_intro_body }}</p>
   </div>
   <div class="feature-grid">
-    {% set features = [
-      ('Infrastructure dashboard', 'A fast overview of estate health, ownership and recent operational changes.'),
-      ('Server and service inventory', 'Track hosts, VMs, containers, networks, vendors, locations and critical service notes.'),
-      ('Remote Manager', 'Launch the right access path and keep operational connection details in one controlled place.'),
-      ('Runbooks', 'Write Markdown procedures for incidents, maintenance windows and repeatable admin tasks.'),
-      ('Licence management', 'Capture keys, vendors, renewals and compliance notes before they disappear into inboxes.'),
-      ('Docker/VM monitoring', 'Follow workloads across Docker hosts and virtual machines with practical status context.'),
-      ('Audit logs', 'Review who changed what, when, and why during day-to-day infrastructure work.'),
-      ('Self-hosted deployment', 'Run Kaya on your own hardware with Docker and retain ownership of your operational data.')
-    ] %}
-    {% for feature in features %}
+    {% for feature in home_features %}
     <article class="feature-card">
       <span class="feature-index">{{ loop.index }}</span>
-      <h3>{{ feature[0] }}</h3>
-      <p>{{ feature[1] }}</p>
+      <h3>{{ feature.title }}</h3>
+      <p>{{ feature.body }}</p>
     </article>
     {% endfor %}
   </div>
@@ -44,29 +34,26 @@
 <section class="band">
   <div class="container split-section">
     <div>
-      <span class="eyebrow">Why Kaya?</span>
-      <h2>Built for infrastructure that is personal, critical and too specific for generic tooling.</h2>
-      <p>Kaya is for the people who know every server has a story: where it lives, what depends on it, how to reach it, and what to do when it complains at the least convenient possible moment.</p>
+      <span class="eyebrow">{{ site_config.home_why_eyebrow }}</span>
+      <h2>{{ site_config.home_why_title }}</h2>
+      <p>{{ site_config.home_why_body }}</p>
     </div>
     <div class="reason-list">
-      <div><strong>No cloud dependency</strong><span>Deploy privately, back up simply, and keep control.</span></div>
-      <div><strong>Operator-first records</strong><span>Designed around the information you reach for during real maintenance.</span></div>
-      <div><strong>Small-team friendly</strong><span>Useful for one careful homelabber or a compact operations team.</span></div>
+      {% for reason in home_reasons %}
+      <div><strong>{{ reason.title }}</strong><span>{{ reason.body }}</span></div>
+      {% endfor %}
     </div>
   </div>
 </section>
 
 <section class="section container split-section">
   <div>
-    <span class="eyebrow">Install</span>
-    <h2>Start with Docker Compose.</h2>
-    <p>Clone Kaya, configure your environment and bring it online on your own host.</p>
+    <span class="eyebrow">{{ site_config.home_install_eyebrow }}</span>
+    <h2>{{ site_config.home_install_title }}</h2>
+    <p>{{ site_config.home_install_body }}</p>
   </div>
   <div class="code-panel">
-    <pre><code>git clone https://github.com/antybubbs/kaya.git
-cd kaya
-cp .env.example .env
-docker compose up -d --build</code></pre>
+    <pre><code>{{ site_config.home_install_code }}</code></pre>
   </div>
 </section>
 

@@ -11,6 +11,31 @@ DEFAULT_SITE_SETTINGS = {
     "maintenance_enabled": "false",
     "maintenance_message": "Kaya is currently undergoing maintenance. Please check back shortly.",
     "home_content": '<span class="eyebrow">Command your self-hosted infrastructure</span>\n<h1>One private operations console for the systems you run.</h1>\n<p>Kaya brings servers, services, remote access, runbooks, licences, assets and operational history into a calm self-hosted control plane.</p>\n<div class="hero-actions">\n  <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>\n  <a class="button button-secondary" href="/install">Get Started</a>\n  <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>\n</div>',
+    "home_intro_eyebrow": "Your Infrastructure. Your Home.",
+    "home_intro_title": "Welcome to Kaya.",
+    "home_intro_body": "Keep asset records, access details, procedures and monitoring context close to the systems they describe.",
+    "home_features": "\n".join([
+        "Infrastructure dashboard|A fast overview of estate health, ownership and recent operational changes.",
+        "Server and service inventory|Track hosts, VMs, containers, networks, vendors, locations and critical service notes.",
+        "Remote Manager|Launch the right access path and keep operational connection details in one controlled place.",
+        "Runbooks|Write Markdown procedures for incidents, maintenance windows and repeatable admin tasks.",
+        "Licence management|Capture keys, vendors, renewals and compliance notes before they disappear into inboxes.",
+        "Docker/VM monitoring|Follow workloads across Docker hosts and virtual machines with practical status context.",
+        "Audit logs|Review who changed what, when, and why during day-to-day infrastructure work.",
+        "Self-hosted deployment|Run Kaya on your own hardware with Docker and retain ownership of your operational data.",
+    ]),
+    "home_why_eyebrow": "Why Kaya?",
+    "home_why_title": "Built for infrastructure that is personal, critical and too specific for generic tooling.",
+    "home_why_body": "Kaya is for the people who know every server has a story: where it lives, what depends on it, how to reach it, and what to do when it complains at the least convenient possible moment.",
+    "home_reasons": "\n".join([
+        "No cloud dependency|Deploy privately, back up simply, and keep control.",
+        "Operator-first records|Designed around the information you reach for during real maintenance.",
+        "Small-team friendly|Useful for one careful homelabber or a compact operations team.",
+    ]),
+    "home_install_eyebrow": "Install",
+    "home_install_title": "Start with Docker Compose.",
+    "home_install_body": "Clone Kaya, configure your environment and bring it online on your own host.",
+    "home_install_code": "git clone https://github.com/antybubbs/kaya.git\ncd kaya\ncp .env.example .env\ndocker compose up -d --build",
 }
 
 

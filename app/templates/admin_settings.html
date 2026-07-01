@@ -33,13 +33,52 @@
         <label for="app_repo_url">Kaya app GitHub repository URL</label>
         <input id="app_repo_url" type="url" name="app_repo_url" value="{{ site_config.app_repo_url }}" placeholder="https://github.com/antybubbs/kaya" />
 
+        <div class="settings-section">
+          <h2>Homepage content</h2>
+
+          <label for="home_intro_eyebrow">Welcome eyebrow</label>
+          <input id="home_intro_eyebrow" type="text" name="home_intro_eyebrow" value="{{ site_config.home_intro_eyebrow }}" />
+
+          <label for="home_intro_title">Welcome heading</label>
+          <input id="home_intro_title" type="text" name="home_intro_title" value="{{ site_config.home_intro_title }}" />
+
+          <label for="home_intro_body">Welcome text</label>
+          <textarea id="home_intro_body" name="home_intro_body" rows="3">{{ site_config.home_intro_body }}</textarea>
+
+          <label for="home_features">Feature cards</label>
+          <textarea id="home_features" name="home_features" rows="10">{{ site_config.home_features }}</textarea>
+          <p class="field-help">One feature per line, using <code>Title|Description</code>.</p>
+
+          <label for="home_why_eyebrow">Why Kaya eyebrow</label>
+          <input id="home_why_eyebrow" type="text" name="home_why_eyebrow" value="{{ site_config.home_why_eyebrow }}" />
+
+          <label for="home_why_title">Why Kaya heading</label>
+          <textarea id="home_why_title" name="home_why_title" rows="3">{{ site_config.home_why_title }}</textarea>
+
+          <label for="home_why_body">Why Kaya text</label>
+          <textarea id="home_why_body" name="home_why_body" rows="4">{{ site_config.home_why_body }}</textarea>
+
+          <label for="home_reasons">Why Kaya cards</label>
+          <textarea id="home_reasons" name="home_reasons" rows="5">{{ site_config.home_reasons }}</textarea>
+          <p class="field-help">One reason per line, using <code>Title|Description</code>.</p>
+
+          <label for="home_install_eyebrow">Install eyebrow</label>
+          <input id="home_install_eyebrow" type="text" name="home_install_eyebrow" value="{{ site_config.home_install_eyebrow }}" />
+
+          <label for="home_install_title">Install heading</label>
+          <input id="home_install_title" type="text" name="home_install_title" value="{{ site_config.home_install_title }}" />
+
+          <label for="home_install_body">Install text</label>
+          <textarea id="home_install_body" name="home_install_body" rows="3">{{ site_config.home_install_body }}</textarea>
+
+          <label for="home_install_code">Install code block</label>
+          <textarea id="home_install_code" name="home_install_code" rows="5">{{ site_config.home_install_code }}</textarea>
+        </div>
+
         <label class="checkbox-label"><input type="checkbox" name="maintenance_enabled" {% if site_config.maintenance_enabled %}checked{% endif %} /> Enable maintenance mode</label>
 
         <label for="maintenance_message">Maintenance message</label>
         <textarea id="maintenance_message" name="maintenance_message" rows="4">{{ site_config.maintenance_message }}</textarea>
-
-        <label for="home_content">Homepage content (HTML)</label>
-        <textarea id="home_content" name="home_content" rows="8">{{ site_config.home_content }}</textarea>
 
         <div class="form-actions">
           <button class="button button-primary" type="submit">Save settings</button>

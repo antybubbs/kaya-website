@@ -281,6 +281,24 @@ th { color: var(--muted); font-size: 0.86rem; }
 .editor-side { position: sticky; top: 96px; }
 .editor-side h2 { margin-top: 0; font-size: 1rem; }
 .editor-side p { color: var(--muted); }
+.settings-section {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 18px;
+  border: 1px solid #2a303a;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.settings-section h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+.field-help {
+  margin: -4px 0 4px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
 .editor-label-row {
   display: flex;
   align-items: center;
