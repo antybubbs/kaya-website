@@ -5,7 +5,7 @@ import base64
 import json
 import time
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+from urllib.request import Request as UrlRequest, urlopen
 from urllib.error import URLError, HTTPError
 
 import bleach
@@ -77,7 +77,7 @@ def parse_github_repo(repo_url: str) -> tuple[str, str] | None:
 
 
 def _read_json(url: str):
-    req = Request(url, headers={"User-Agent": "kaya-website"})
+    req = UrlRequest(url, headers={"User-Agent": "kaya-website"})
     with urlopen(req, timeout=settings.github_api_timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
 
