@@ -877,7 +877,7 @@ tbody tr:hover {
 .hero-product-shot {
   position: relative;
   margin-right: 0;
-  margin-top: -26px;
+  margin-top: -76px;
   justify-self: end;
   z-index: 1;
   width: min(980px, 100%);
@@ -890,7 +890,7 @@ tbody tr:hover {
     0 32px 90px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(255, 255, 255, 0.03) inset;
   overflow: visible;
-  transform: perspective(1800px) rotateY(-8deg) rotateX(2deg) rotateZ(-0.4deg);
+  transform: perspective(2200px) rotateY(-4deg) rotateX(0.8deg) rotateZ(0deg);
   transform-origin: left center;
   transition: transform 260ms ease, box-shadow 260ms ease;
 }
@@ -924,7 +924,7 @@ tbody tr:hover {
 }
 
 .hero-product-shot:hover {
-  transform: perspective(1800px) rotateY(-6deg) rotateX(1.5deg) rotateZ(-0.2deg) translateY(-9px);
+  transform: perspective(2200px) rotateY(-2.5deg) rotateX(0.4deg) rotateZ(0deg) translateY(-9px);
   box-shadow:
     0 38px 100px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.045) inset;
@@ -938,8 +938,6 @@ tbody tr:hover {
   border: 0;
   background: #080b10;
   box-shadow: none;
-  transform: translateZ(0);
-  backface-visibility: hidden;
   image-rendering: auto;
 }
 
