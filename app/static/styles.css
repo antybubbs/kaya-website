@@ -869,6 +869,12 @@ tbody tr:hover {
   margin-inline: auto;
 }
 
+.hero-grid-image-only .hero-copy,
+.hero-grid-image-only .hero-actions,
+.hero-grid-image-only .hero-stats {
+  display: none !important;
+}
+
 .hero-professional .hero-copy h1 {
   max-width: 780px;
   font-size: clamp(3rem, 5.2vw, 5.4rem);
