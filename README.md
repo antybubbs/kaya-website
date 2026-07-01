@@ -75,13 +75,24 @@ The SQLite database and uploads remain in Docker volumes.
 
 ## Install from GHCR (Main or Dev Branch)
 
+Use the official image-only compose file in this repository:
+
+```bash
+docker compose -f docker-compose.image.yml pull
+docker compose -f docker-compose.image.yml up -d
+```
+
+This file defaults to the stable `main` image tag.
+
+To install a specific dev branch image, copy `docker-compose.image.yml` to your own `docker-compose.yml` and change the `image` tag to your branch tag, for example `dev2.0.0`.
+
 The publish workflow tags images by branch name, so pushing branch `dev2.0.0` publishes:
 
 ```text
 ghcr.io/antybubbs/kaya-website:dev2.0.0
 ```
 
-Example `docker-compose.yml` service using GHCR image tags:
+Example service for a dev branch image tag:
 
 ```yaml
 services:

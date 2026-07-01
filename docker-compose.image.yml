@@ -1,0 +1,13 @@
+services:
+  website:
+    image: ghcr.io/antybubbs/kaya-website:main
+    ports:
+      - "8090:8090"
+    volumes:
+      - kaya_website_data:/app/data
+      - kaya_website_uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  kaya_website_data:
+  kaya_website_uploads:

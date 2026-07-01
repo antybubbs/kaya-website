@@ -580,7 +580,7 @@ def create_app():
             uploaded_header_logo = await save_upload(header_logo_image, db)
             header_logo_url = f"/uploads/{uploaded_header_logo.filename}"
         crud.set_site_setting(db, "site_logo_url", site_logo_url or "/static/brand/kaya-full-logo.svg")
-        crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-icon.svg")
+        crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
         crud.set_site_setting(db, "home_content", home_content or "<h2>Welcome</h2><p>Edit this content in Settings.</p>")
