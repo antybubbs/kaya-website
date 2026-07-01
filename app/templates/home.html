@@ -2,10 +2,7 @@
 
 {% block content %}
 <section class="hero hero-professional">
-  <div class="container hero-grid">
-    <div class="hero-copy">
-      {{ site_config.home_content|safe }}
-    </div>
+  <div class="container hero-grid hero-grid-image-only">
     <div class="hero-product-shot" aria-label="Kaya Command dashboard screenshot">
       <img class="dashboard-screenshot" src="{{ site_config.home_hero_image_url if site_config else '/static/kaya-dashboard-screenshot.svg' }}" alt="Kaya Command dashboard showing infrastructure at a glance, live status, compute metrics and VM Docker Manager." />
     </div>
