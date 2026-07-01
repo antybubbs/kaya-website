@@ -2,6 +2,11 @@ from pathlib import Path
 from uuid import uuid4
 import re
 import base64
+import json
+import time
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 
 import bleach
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile, status
@@ -32,6 +37,8 @@ from .security import TOTP2FA, PasswordValidator
 
 BASE_DIR = Path(__file__).resolve().parent
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"}
+GITHUB_API_BASE = "https://api.github.com/repos"
+_version_cache = {}
 
 
 env = Environment(
@@ -56,11 +63,88 @@ def has_admin_users(db) -> bool:
     return db.scalar(select(models.AdminUser.id)) is not None
 
 
+def parse_github_repo(repo_url: str) -> tuple[str, str] | None:
+    try:
+        parsed = urlparse(repo_url)
+        if parsed.netloc.lower() != "github.com":
+            return None
+        parts = [p for p in parsed.path.split("/") if p]
+        if len(parts) < 2:
+            return None
+        return parts[0], parts[1]
+    except Exception:
+        return None
+
+
+def _read_json(url: str):
+    req = Request(url, headers={"User-Agent": "kaya-website"})
+    with urlopen(req, timeout=settings.github_api_timeout_seconds) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def fetch_latest_repo_version(owner: str, repo: str) -> str | None:
+    release_url = f"{GITHUB_API_BASE}/{owner}/{repo}/releases/latest"
+    tags_url = f"{GITHUB_API_BASE}/{owner}/{repo}/tags?per_page=1"
+
+    try:
+        release = _read_json(release_url)
+        tag = (release or {}).get("tag_name")
+        if tag:
+            return str(tag)
+    except HTTPError as exc:
+        if exc.code != 404:
+            return None
+    except (URLError, TimeoutError, ValueError):
+        return None
+
+    try:
+        tags = _read_json(tags_url)
+        if isinstance(tags, list) and tags:
+            name = tags[0].get("name")
+            if name:
+                return str(name)
+    except (HTTPError, URLError, TimeoutError, ValueError):
+        return None
+    return None
+
+
+def get_release_versions() -> dict[str, str]:
+    repos = {
+        "website": parse_github_repo(settings.website_github_url),
+        "app": parse_github_repo(settings.github_url),
+    }
+    now = time.time()
+    versions = {
+        "website": settings.kaya_version,
+        "app": settings.kaya_version,
+    }
+
+    for key, repo in repos.items():
+        if not repo:
+            continue
+        owner, name = repo
+        cache_key = f"{owner}/{name}"
+        cache_entry = _version_cache.get(cache_key)
+        if cache_entry and now - cache_entry["ts"] < settings.github_version_cache_seconds:
+            versions[key] = cache_entry["version"]
+            continue
+
+        latest = fetch_latest_repo_version(owner, name)
+        if latest:
+            _version_cache[cache_key] = {"version": latest, "ts": now}
+            versions[key] = latest
+        elif cache_entry:
+            versions[key] = cache_entry["version"]
+
+    return versions
+
+
 def common_context(db=None, **context):
     if db is not None:
         context.setdefault("nav_items", get_nav_items(db))
         context.setdefault("site_config", crud.get_site_settings(db))
     context.setdefault("settings", settings)
+    context.setdefault("release_versions", get_release_versions())
     return context
 
 
@@ -565,11 +649,13 @@ def create_app():
         request: Request,
         site_logo_url: str = Form(""),
         header_logo_url: str = Form(""),
+        home_hero_image_url: str = Form(""),
         maintenance_enabled: bool = Form(False),
         maintenance_message: str = Form(""),
         home_content: str = Form(""),
         logo_image: UploadFile | None = File(None),
         header_logo_image: UploadFile | None = File(None),
+        home_hero_image: UploadFile | None = File(None),
         db=Depends(get_db),
     ):
         require_admin(request)
@@ -579,8 +665,12 @@ def create_app():
         if header_logo_image and header_logo_image.filename:
             uploaded_header_logo = await save_upload(header_logo_image, db)
             header_logo_url = f"/uploads/{uploaded_header_logo.filename}"
+        if home_hero_image and home_hero_image.filename:
+            uploaded_home_hero = await save_upload(home_hero_image, db)
+            home_hero_image_url = f"/uploads/{uploaded_home_hero.filename}"
         crud.set_site_setting(db, "site_logo_url", site_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
+        crud.set_site_setting(db, "home_hero_image_url", home_hero_image_url or "/static/kaya-dashboard-screenshot.svg")
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
         crud.set_site_setting(db, "home_content", home_content or "<h2>Welcome</h2><p>Edit this content in Settings.</p>")

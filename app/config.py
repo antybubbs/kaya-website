@@ -27,8 +27,11 @@ class Settings(BaseSettings):
     allowed_hosts: str = "*"
     session_cookie_secure: bool = False
     github_url: str = "https://github.com/antybubbs/kaya"
+    website_github_url: str = "https://github.com/antybubbs/kaya-website"
     demo_url: str = "/demo"
     kaya_version: str = "v0.19.1"
+    github_api_timeout_seconds: int = 4
+    github_version_cache_seconds: int = 900
     database_url: str = f"sqlite:///{BASE_DIR / 'data' / 'website.db'}"
     uploads_dir: Path = BASE_DIR / "uploads"
     
