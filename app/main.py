@@ -156,6 +156,63 @@ def common_context(db=None, **context):
     return context
 
 
+def is_docs_slug(slug: str) -> bool:
+    clean = models.normalize_slug(slug)
+    return clean == "documentation" or clean.startswith("documentation/")
+
+
+def build_docs_sidebar(pages, current_slug: str):
+    root = {
+        "key": "documentation",
+        "title": "Documentation",
+        "url": "/documentation",
+        "page": None,
+        "page_sort": None,
+        "children": {},
+    }
+
+    for page in pages:
+        slug = models.normalize_slug(page.slug)
+        if not is_docs_slug(slug):
+            continue
+
+        if slug == "documentation":
+            root["page"] = page
+            root["title"] = page.title
+            root["page_sort"] = page.sort_order
+            continue
+
+        rel = slug[len("documentation/"):]
+        parts = [part for part in rel.split("/") if part]
+        node = root
+        acc = "documentation"
+        for part in parts:
+            acc = f"{acc}/{part}"
+            if part not in node["children"]:
+                node["children"][part] = {
+                    "key": acc,
+                    "title": part.replace("-", " ").title(),
+                    "url": f"/{acc}",
+                    "page": None,
+                    "page_sort": None,
+                    "children": {},
+                }
+            node = node["children"][part]
+
+        node["page"] = page
+        node["title"] = page.title
+        node["url"] = f"/{slug}"
+        node["page_sort"] = page.sort_order
+
+    def to_list(node):
+        children = [to_list(child) for child in node["children"].values()]
+        children.sort(key=lambda item: ((item["page_sort"] if item["page_sort"] is not None else 10**9), item["title"].lower()))
+        node["children"] = children
+        return node
+
+    return to_list(root)
+
+
 def render_template(template_name: str, **context):
     if "site_config" not in context:
         with SessionLocal() as db:
@@ -822,6 +879,22 @@ def create_app():
         page = crud.get_page_by_slug(db, clean_slug)
         if not page or not page.published:
             raise HTTPException(status_code=404, detail="Page not found")
+
+        if is_docs_slug(clean_slug):
+            docs_sidebar = build_docs_sidebar(crud.list_pages(db, only_published=True), clean_slug)
+            return render_template(
+                "docs_page.html",
+                **common_context(
+                    db,
+                    title=page.title,
+                    meta_description=page.meta_description,
+                    page=page,
+                    page_html=sanitize_html(page.content or ""),
+                    docs_sidebar=docs_sidebar,
+                    current_slug=clean_slug,
+                ),
+            )
+
         return render_template("page.html", **common_context(db, title=page.title, meta_description=page.meta_description, page=page, page_html=sanitize_html(page.content or "")))
 
     return app
