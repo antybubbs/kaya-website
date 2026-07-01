@@ -865,7 +865,8 @@ tbody tr:hover {
 
 .hero-professional .hero-grid.hero-grid-image-only {
   grid-template-columns: 1fr;
-  width: 100%;
+  width: min(1320px, calc(100% - clamp(180px, 18vw, 320px)));
+  margin-inline: auto;
 }
 
 .hero-professional .hero-copy h1 {
@@ -1023,7 +1024,7 @@ tbody tr:hover {
   }
 
   .hero-professional .hero-grid.hero-grid-image-only {
-    width: 100%;
+    width: min(1320px, calc(100% - 48px));
   }
 
   .hero-product-shot {
