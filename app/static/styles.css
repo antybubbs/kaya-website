@@ -870,9 +870,17 @@ tbody tr:hover {
 }
 
 .hero-grid-image-only .hero-copy,
-.hero-grid-image-only .hero-actions,
 .hero-grid-image-only .hero-stats {
   display: none !important;
+}
+
+.hero-grid-image-only .hero-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 22px auto 0;
 }
 
 .hero-professional .hero-copy h1 {

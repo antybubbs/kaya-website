@@ -6,6 +6,11 @@
     <div class="hero-product-shot" aria-label="Kaya Command dashboard screenshot">
       <img class="dashboard-screenshot" src="{{ site_config.home_hero_image_url if site_config else '/static/kaya-dashboard-screenshot.svg' }}" alt="Kaya Command dashboard showing infrastructure at a glance, live status, compute metrics and VM Docker Manager." />
     </div>
+    <div class="hero-actions" aria-label="Primary actions">
+      <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>
+      <a class="button button-secondary" href="/install">Get Started</a>
+      <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>
+    </div>
   </div>
 </section>
 
