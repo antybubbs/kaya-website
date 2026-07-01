@@ -161,7 +161,8 @@ def is_docs_slug(slug: str) -> bool:
     return clean == "documentation" or clean.startswith("documentation/")
 
 
-def build_docs_sidebar(pages, current_slug: str):
+def build_docs_sidebar(pages):
+    page_map = {page.id: page for page in pages}
     root = {
         "key": "documentation",
         "title": "Documentation",
@@ -172,17 +173,17 @@ def build_docs_sidebar(pages, current_slug: str):
     }
 
     for page in pages:
-        slug = models.normalize_slug(page.slug)
-        if not is_docs_slug(slug):
+        page_path = models.normalize_slug(crud.get_page_path(page, page_map))
+        if not is_docs_slug(page_path):
             continue
 
-        if slug == "documentation":
+        if page_path == "documentation":
             root["page"] = page
             root["title"] = page.title
             root["page_sort"] = page.sort_order
             continue
 
-        rel = slug[len("documentation/"):]
+        rel = page_path[len("documentation/"):]
         parts = [part for part in rel.split("/") if part]
         node = root
         acc = "documentation"
@@ -201,7 +202,7 @@ def build_docs_sidebar(pages, current_slug: str):
 
         node["page"] = page
         node["title"] = page.title
-        node["url"] = f"/{slug}"
+        node["url"] = f"/{page_path}"
         node["page_sort"] = page.sort_order
 
     def to_list(node):
@@ -897,6 +898,21 @@ def create_app():
 
         pages = crud.get_pages(db, only_published=True)
         page_map = {item.id: item for item in pages}
+        current_path = crud.get_page_path(page, page_map)
+        if is_docs_slug(current_path):
+            return render_template(
+                "docs_page.html",
+                **common_context(
+                    db,
+                    title=page.title,
+                    meta_description=page.meta_description,
+                    page=page,
+                    page_html=sanitize_html(page.content or ""),
+                    docs_sidebar=build_docs_sidebar(pages),
+                    current_slug=current_path,
+                ),
+            )
+
         has_children = any(item.parent_id == page.id for item in pages)
         if page.parent_id is not None or has_children:
             return render_template(
@@ -908,7 +924,7 @@ def create_app():
                     page=page,
                     page_html=sanitize_html(page.content or ""),
                     page_tree=crud.build_page_tree(pages),
-                    current_path=crud.get_page_url(page, page_map),
+                    current_path=current_path,
                 ),
             )
 
