@@ -1020,6 +1020,17 @@ tbody tr:hover {
   width: min(1280px, calc(100% - 40px));
 }
 
+.home-memory-section .section-heading {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.home-memory-section .section-heading p {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 @media (max-width: 1180px) {
   .header-inner {
     align-items: flex-start;
