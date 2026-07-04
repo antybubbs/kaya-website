@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     session_cookie_secure: bool = False
     github_url: str = "https://github.com/antybubbs/kaya"
     website_github_url: str = "https://github.com/antybubbs/kaya-website"
-    demo_url: str = "/demo"
+    demo_url: str = "https://demo.kaya-app.uk/"
     kaya_version: str = "v0.19.1"
     github_api_timeout_seconds: int = 4
     github_version_cache_seconds: int = 900

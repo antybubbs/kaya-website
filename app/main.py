@@ -108,10 +108,18 @@ def fetch_latest_repo_version(owner: str, repo: str) -> str | None:
     return None
 
 
-def get_release_versions() -> dict[str, str]:
+def get_release_repo_urls(site_config: dict | None = None) -> dict[str, str]:
+    return {
+        "website": (site_config or {}).get("website_repo_url") or settings.website_github_url,
+        "app": (site_config or {}).get("app_repo_url") or settings.github_url,
+    }
+
+
+def get_release_versions(repo_urls: dict[str, str] | None = None) -> dict[str, str]:
+    repo_urls = repo_urls or get_release_repo_urls()
     repos = {
-        "website": parse_github_repo(settings.website_github_url),
-        "app": parse_github_repo(settings.github_url),
+        "website": parse_github_repo(repo_urls.get("website", "")),
+        "app": parse_github_repo(repo_urls.get("app", "")),
     }
     now = time.time()
     versions = {
@@ -144,15 +152,73 @@ def common_context(db=None, **context):
         context.setdefault("nav_items", get_nav_items(db))
         context.setdefault("site_config", crud.get_site_settings(db))
     context.setdefault("settings", settings)
-    context.setdefault("release_versions", get_release_versions())
+    context.setdefault("release_versions", get_release_versions(get_release_repo_urls(context.get("site_config"))))
     return context
+
+
+def is_docs_slug(slug: str) -> bool:
+    clean = models.normalize_slug(slug)
+    return clean == "documentation" or clean.startswith("documentation/")
+
+
+def build_docs_sidebar(pages):
+    page_map = {page.id: page for page in pages}
+    root = {
+        "key": "documentation",
+        "title": "Documentation",
+        "url": "/documentation",
+        "page": None,
+        "page_sort": None,
+        "children": {},
+    }
+
+    for page in pages:
+        page_path = models.normalize_slug(crud.get_page_path(page, page_map))
+        if not is_docs_slug(page_path):
+            continue
+
+        if page_path == "documentation":
+            root["page"] = page
+            root["title"] = page.title
+            root["page_sort"] = page.sort_order
+            continue
+
+        rel = page_path[len("documentation/"):]
+        parts = [part for part in rel.split("/") if part]
+        node = root
+        acc = "documentation"
+        for part in parts:
+            acc = f"{acc}/{part}"
+            if part not in node["children"]:
+                node["children"][part] = {
+                    "key": acc,
+                    "title": part.replace("-", " ").title(),
+                    "url": f"/{acc}",
+                    "page": None,
+                    "page_sort": None,
+                    "children": {},
+                }
+            node = node["children"][part]
+
+        node["page"] = page
+        node["title"] = page.title
+        node["url"] = f"/{page_path}"
+        node["page_sort"] = page.sort_order
+
+    def to_list(node):
+        children = [to_list(child) for child in node["children"].values()]
+        children.sort(key=lambda item: ((item["page_sort"] if item["page_sort"] is not None else 10**9), item["title"].lower()))
+        node["children"] = children
+        return node
+
+    return to_list(root)
 
 
 def render_template(template_name: str, **context):
     if "site_config" not in context:
         with SessionLocal() as db:
             context["site_config"] = crud.get_site_settings(db)
-    context.setdefault("release_versions", get_release_versions())
+    context.setdefault("release_versions", get_release_versions(get_release_repo_urls(context.get("site_config"))))
     template = env.get_template(template_name)
     return HTMLResponse(template.render(**context))
 
@@ -171,6 +237,20 @@ def sanitize_html(content: str) -> str:
     }
     raw_html = markdown(content or "", extensions=["fenced_code", "tables", "sane_lists"])
     return bleach.clean(raw_html, tags=allowed_tags, attributes=allowed_attrs, protocols=["http", "https", "mailto"], strip=True)
+
+
+def parse_homepage_items(value: str, fallback: str = ""):
+    items = []
+    source = value or fallback or ""
+    for line in source.splitlines():
+        if not line.strip():
+            continue
+        title, separator, body = line.partition("|")
+        items.append({
+            "title": title.strip(),
+            "body": body.strip() if separator else "",
+        })
+    return items
 
 
 def page_payload(title, slug, meta_description, content, order, nav=True):
@@ -344,8 +424,9 @@ async def save_upload(upload: UploadFile, db):
     return crud.create_upload(db, unique_name, upload.filename, upload.content_type, len(content))
 
 
-def build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order):
+def build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order, parent_id=None):
     return schemas.PageCreate(
+        parent_id=parent_id,
         title=title,
         slug=slug,
         meta_description=meta_description,
@@ -404,7 +485,18 @@ def create_app():
     @app.get("/", response_class=HTMLResponse)
     def public_home(request: Request, db=Depends(get_db)):
         posts = crud.list_posts(db, only_published=True)[:3]
-        return render_template("home.html", **common_context(db, title="Kaya", posts=posts))
+        site_config = crud.get_site_settings(db)
+        return render_template(
+            "home.html",
+            **common_context(
+                db,
+                title="Kaya",
+                posts=posts,
+                site_config=site_config,
+                home_features=parse_homepage_items(site_config.get("home_features", "")),
+                home_reasons=parse_homepage_items(site_config.get("home_reasons", "")),
+            ),
+        )
 
     @app.get("/blog", response_class=HTMLResponse)
     def public_blog(request: Request, db=Depends(get_db)):
@@ -516,25 +608,31 @@ def create_app():
     @app.get("/admin/pages", response_class=HTMLResponse)
     def admin_pages(request: Request, db=Depends(get_db)):
         require_admin(request)
-        pages = crud.list_pages(db, only_published=False)
+        pages = crud.get_pages(db, only_published=False)
         return render_template("admin_pages.html", title="Pages", pages=pages, nav_items=[], settings=settings)
 
     @app.get("/admin/pages/new", response_class=HTMLResponse)
     def admin_new_page(request: Request, db=Depends(get_db)):
         require_admin(request)
-        return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), form_action="/admin/pages/new", nav_items=[], message=None, settings=settings)
+        pages = crud.get_pages(db, only_published=False)
+        return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages), form_action="/admin/pages/new", nav_items=[], message=None, settings=settings)
 
     @app.post("/admin/pages/new")
-    async def admin_create_page(request: Request, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), image: UploadFile | None = File(None), db=Depends(get_db)):
+    async def admin_create_page(request: Request, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), parent_id: int | None = Form(None), image: UploadFile | None = File(None), db=Depends(get_db)):
         require_admin(request)
-        page_in = build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order)
+        if parent_id is not None and db.get(models.Page, parent_id) is None:
+            pages = crud.get_pages(db, only_published=False)
+            return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages), form_action="/admin/pages/new", nav_items=[], message=None, error="Selected parent page was not found.", settings=settings)
+
+        page_in = build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order, parent_id=parent_id)
         try:
             crud.create_page(db, page_in)
             if image and image.filename:
                 await save_upload(image, db)
         except IntegrityError:
             db.rollback()
-            return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), form_action="/admin/pages/new", nav_items=[], message="A page with that slug already exists.", settings=settings)
+            pages = crud.get_pages(db, only_published=False)
+            return render_template("admin_edit_page.html", title="Create page", page=None, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages), form_action="/admin/pages/new", nav_items=[], message="A page with that slug already exists.", settings=settings)
         return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
 
     @app.get("/admin/pages/{page_id}/edit", response_class=HTMLResponse)
@@ -543,22 +641,30 @@ def create_app():
         page = db.get(models.Page, page_id)
         if not page:
             raise HTTPException(status_code=404, detail="Not found")
-        return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, settings=settings)
+        pages = crud.get_pages(db, only_published=False)
+        return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, settings=settings)
 
     @app.post("/admin/pages/{page_id}/edit")
-    async def admin_update_page(request: Request, page_id: int, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), image: UploadFile | None = File(None), db=Depends(get_db)):
+    async def admin_update_page(request: Request, page_id: int, title: str = Form(...), slug: str = Form(""), meta_description: str = Form(""), content: str = Form(""), published: bool = Form(False), show_in_navigation: bool = Form(False), sort_order: int = Form(100), parent_id: int | None = Form(None), image: UploadFile | None = File(None), db=Depends(get_db)):
         require_admin(request)
         page = db.get(models.Page, page_id)
         if not page:
             raise HTTPException(status_code=404, detail="Not found")
-        page_in = schemas.PageUpdate(**build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order).model_dump())
+        all_pages = crud.get_pages(db, only_published=False)
+        excluded_ids = crud.get_descendant_ids(all_pages, page.id)
+        if parent_id == page.id or (parent_id is not None and parent_id in excluded_ids):
+            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(all_pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, error="Please choose a different parent page.", settings=settings)
+        if parent_id is not None and db.get(models.Page, parent_id) is None:
+            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(all_pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message=None, error="Selected parent page was not found.", settings=settings)
+
+        page_in = schemas.PageUpdate(**build_page_form(title, slug, meta_description, content, published, show_in_navigation, sort_order, parent_id=parent_id).model_dump())
         try:
             crud.update_page(db, page, page_in)
             if image and image.filename:
                 await save_upload(image, db)
         except IntegrityError:
             db.rollback()
-            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message="A page with that slug already exists.", settings=settings)
+            return render_template("admin_edit_page.html", title="Edit page", page=page, uploads=crud.list_uploads(db), parent_options=crud.build_page_parent_options(all_pages, exclude_page_id=page.id), form_action=f"/admin/pages/{page_id}/edit", nav_items=[], message="A page with that slug already exists.", settings=settings)
         return RedirectResponse(url="/admin/pages", status_code=status.HTTP_302_FOUND)
 
     @app.post("/admin/pages/{page_id}/delete")
@@ -648,18 +754,76 @@ def create_app():
             settings=settings,
         )
 
+    @app.get("/admin/homepage", response_class=HTMLResponse)
+    def admin_homepage(request: Request, db=Depends(get_db)):
+        require_admin(request)
+        return render_template(
+            "admin_homepage.html",
+            title="Homepage",
+            nav_items=[],
+            site_config=crud.get_site_settings(db),
+            uploads=crud.list_uploads(db),
+            message=None,
+            settings=settings,
+        )
+
+    @app.post("/admin/homepage", response_class=HTMLResponse)
+    async def admin_homepage_update(
+        request: Request,
+        home_hero_image_url: str = Form(""),
+        home_intro_eyebrow: str = Form(""),
+        home_intro_title: str = Form(""),
+        home_intro_body: str = Form(""),
+        home_features: str = Form(""),
+        home_why_eyebrow: str = Form(""),
+        home_why_title: str = Form(""),
+        home_why_body: str = Form(""),
+        home_reasons: str = Form(""),
+        home_install_eyebrow: str = Form(""),
+        home_install_title: str = Form(""),
+        home_install_body: str = Form(""),
+        home_install_code: str = Form(""),
+        home_hero_image: UploadFile | None = File(None),
+        db=Depends(get_db),
+    ):
+        require_admin(request)
+        if home_hero_image and home_hero_image.filename:
+            uploaded_home_hero = await save_upload(home_hero_image, db)
+            home_hero_image_url = f"/uploads/{uploaded_home_hero.filename}"
+        crud.set_site_setting(db, "home_hero_image_url", home_hero_image_url or "/static/kaya-dashboard-screenshot.svg")
+        crud.set_site_setting(db, "home_intro_eyebrow", home_intro_eyebrow)
+        crud.set_site_setting(db, "home_intro_title", home_intro_title)
+        crud.set_site_setting(db, "home_intro_body", home_intro_body)
+        crud.set_site_setting(db, "home_features", home_features)
+        crud.set_site_setting(db, "home_why_eyebrow", home_why_eyebrow)
+        crud.set_site_setting(db, "home_why_title", home_why_title)
+        crud.set_site_setting(db, "home_why_body", home_why_body)
+        crud.set_site_setting(db, "home_reasons", home_reasons)
+        crud.set_site_setting(db, "home_install_eyebrow", home_install_eyebrow)
+        crud.set_site_setting(db, "home_install_title", home_install_title)
+        crud.set_site_setting(db, "home_install_body", home_install_body)
+        crud.set_site_setting(db, "home_install_code", home_install_code)
+        return render_template(
+            "admin_homepage.html",
+            title="Homepage",
+            nav_items=[],
+            site_config=crud.get_site_settings(db),
+            uploads=crud.list_uploads(db),
+            message="Homepage saved.",
+            settings=settings,
+        )
+
     @app.post("/admin/settings", response_class=HTMLResponse)
     async def admin_site_settings_update(
         request: Request,
         site_logo_url: str = Form(""),
         header_logo_url: str = Form(""),
-        home_hero_image_url: str = Form(""),
+        website_repo_url: str = Form(""),
+        app_repo_url: str = Form(""),
         maintenance_enabled: bool = Form(False),
         maintenance_message: str = Form(""),
-        home_content: str = Form(""),
         logo_image: UploadFile | None = File(None),
         header_logo_image: UploadFile | None = File(None),
-        home_hero_image: UploadFile | None = File(None),
         db=Depends(get_db),
     ):
         require_admin(request)
@@ -669,15 +833,12 @@ def create_app():
         if header_logo_image and header_logo_image.filename:
             uploaded_header_logo = await save_upload(header_logo_image, db)
             header_logo_url = f"/uploads/{uploaded_header_logo.filename}"
-        if home_hero_image and home_hero_image.filename:
-            uploaded_home_hero = await save_upload(home_hero_image, db)
-            home_hero_image_url = f"/uploads/{uploaded_home_hero.filename}"
         crud.set_site_setting(db, "site_logo_url", site_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
-        crud.set_site_setting(db, "home_hero_image_url", home_hero_image_url or "/static/kaya-dashboard-screenshot.svg")
+        crud.set_site_setting(db, "website_repo_url", website_repo_url or settings.website_github_url)
+        crud.set_site_setting(db, "app_repo_url", app_repo_url or settings.github_url)
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
-        crud.set_site_setting(db, "home_content", home_content or "<h2>Welcome</h2><p>Edit this content in Settings.</p>")
         return render_template(
             "admin_settings.html",
             title="Site settings",
@@ -807,9 +968,42 @@ def create_app():
     @app.get("/{slug:path}", response_class=HTMLResponse)
     def public_page(request: Request, slug: str, db=Depends(get_db)):
         clean_slug = models.normalize_slug(slug)
-        page = crud.get_page_by_slug(db, clean_slug)
+        page = crud.get_page_by_path(db, clean_slug)
         if not page or not page.published:
             raise HTTPException(status_code=404, detail="Page not found")
+
+        pages = crud.get_pages(db, only_published=True)
+        page_map = {item.id: item for item in pages}
+        current_path = crud.get_page_path(page, page_map)
+        if is_docs_slug(current_path):
+            return render_template(
+                "docs_page.html",
+                **common_context(
+                    db,
+                    title=page.title,
+                    meta_description=page.meta_description,
+                    page=page,
+                    page_html=sanitize_html(page.content or ""),
+                    docs_sidebar=build_docs_sidebar(pages),
+                    current_slug=current_path,
+                ),
+            )
+
+        has_children = any(item.parent_id == page.id for item in pages)
+        if page.parent_id is not None or has_children:
+            return render_template(
+                "page_hierarchy.html",
+                **common_context(
+                    db,
+                    title=page.title,
+                    meta_description=page.meta_description,
+                    page=page,
+                    page_html=sanitize_html(page.content or ""),
+                    page_tree=crud.build_page_tree(pages),
+                    current_path=current_path,
+                ),
+            )
+
         return render_template("page.html", **common_context(db, title=page.title, meta_description=page.meta_description, page=page, page_html=sanitize_html(page.content or "")))
 
     return app

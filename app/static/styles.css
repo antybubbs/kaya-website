@@ -281,6 +281,108 @@ th { color: var(--muted); font-size: 0.86rem; }
 .editor-side { position: sticky; top: 96px; }
 .editor-side h2 { margin-top: 0; font-size: 1rem; }
 .editor-side p { color: var(--muted); }
+.settings-section {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 18px;
+  border: 1px solid #2a303a;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.settings-section h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+.field-help {
+  margin: -4px 0 4px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.editor-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rich-editor {
+  display: grid;
+  gap: 10px;
+}
+.editor-mode-tabs,
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.editor-mode-tabs button,
+.editor-toolbar button,
+.button-small {
+  border: 1px solid rgba(255, 138, 0, 0.24);
+  border-radius: 7px;
+  background: rgba(24, 20, 15, 0.92);
+  color: #dce7f8;
+  cursor: pointer;
+  font-weight: 800;
+}
+.editor-mode-tabs button,
+.editor-toolbar button {
+  min-height: 34px;
+  padding: 7px 10px;
+}
+.editor-mode-tabs button.active,
+.editor-toolbar button:hover,
+.editor-mode-tabs button:hover {
+  border-color: rgba(255, 138, 0, 0.58);
+  background: rgba(255, 138, 0, 0.16);
+  color: #fff;
+}
+.visual-editor {
+  min-height: 460px;
+  padding: 18px;
+  overflow: auto;
+  border: 1px solid #2a303a;
+  border-radius: 8px;
+  background: #0d1117;
+  color: var(--text);
+}
+.visual-editor:focus {
+  border-color: rgba(255, 138, 0, 0.78);
+  outline: 2px solid rgba(255, 138, 0, 0.18);
+}
+.visual-editor:empty::before {
+  content: "Start writing your guide...";
+  color: var(--muted-2);
+}
+.visual-editor img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 16px 0;
+  border: 1px solid #2a303a;
+  border-radius: 8px;
+}
+.visual-editor pre {
+  white-space: pre-wrap;
+}
+.markdown-source {
+  min-height: 460px;
+  font-family: Consolas, "Liberation Mono", monospace;
+  line-height: 1.55;
+}
+.rich-editor[data-mode="visual"] .markdown-source {
+  display: none;
+}
+.rich-editor[data-mode="source"] .visual-editor,
+.rich-editor[data-mode="source"] .editor-toolbar {
+  display: none;
+}
+.button-small {
+  width: auto;
+  margin-top: 10px;
+  padding: 7px 9px;
+  font-size: 0.82rem;
+}
 .upload-form { display: flex; gap: 10px; align-items: center; }
 .upload-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .upload-card, .upload-list div { padding: 12px; }
@@ -1020,6 +1122,14 @@ tbody tr:hover {
   width: min(1280px, calc(100% - 40px));
 }
 
+.band > .container {
+  width: min(1280px, calc(100% - 40px));
+}
+
+.band > .split-section {
+  padding: 62px 0;
+}
+
 .home-memory-section .section-heading {
   margin-left: auto;
   margin-right: auto;
@@ -1099,6 +1209,7 @@ tbody tr:hover {
   .hero-brand-row,
   .hero-professional .hero-grid,
   .section.container,
+  .band > .container,
   .site-header .container {
     width: min(100% - 28px, 1280px);
   }
@@ -1167,4 +1278,89 @@ tbody tr:hover {
   margin: 0 auto 24px;
   max-width: 42ch;
   color: var(--muted);
+}
+
+.maintenance-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Documentation layout */
+.docs-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.docs-sidebar {
+  position: sticky;
+  top: 96px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.026));
+  padding: 16px;
+}
+
+.docs-sidebar h2 {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+}
+
+.docs-tree,
+.docs-tree ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.docs-tree ul {
+  margin-top: 6px;
+  margin-left: 12px;
+  border-left: 1px solid var(--line);
+  padding-left: 10px;
+}
+
+.docs-node {
+  margin: 2px 0;
+}
+
+.docs-node > a,
+.docs-details summary a {
+  display: inline-block;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.docs-node.active > a,
+.docs-node.active .docs-details > summary a {
+  color: #ffd08a;
+  background: rgba(255, 138, 0, 0.1);
+}
+
+.docs-details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.docs-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs-content {
+  max-width: none;
+}
+
+@media (max-width: 1040px) {
+  .docs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-sidebar {
+    position: static;
+  }
 }

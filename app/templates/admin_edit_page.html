@@ -8,9 +8,18 @@
       <span class="eyebrow">Pages</span>
       <h1>{{ page and 'Edit page' or 'Create page' }}</h1>
       {% if message %}<p class="message">{{ message }}</p>{% endif %}
+      {% if error %}<p class="alert alert-error">{{ error }}</p>{% endif %}
       <form method="post" action="{{ form_action }}" enctype="multipart/form-data" class="editor-form">
         <label for="title">Title</label>
         <input id="title" type="text" name="title" value="{{ page.title if page else '' }}" required />
+
+        <label for="parent_id">Parent page</label>
+        <select id="parent_id" name="parent_id">
+          <option value="">Top level page</option>
+          {% for option in parent_options %}
+          <option value="{{ option.id }}" {% if page and page.parent_id == option.id %}selected{% endif %}>{{ ('— ' * option.depth) }}{{ option.title }}</option>
+          {% endfor %}
+        </select>
 
         <label for="slug">Slug</label>
         <input id="slug" type="text" name="slug" value="{{ page.slug if page else '' }}" placeholder="features" />
@@ -18,8 +27,31 @@
         <label for="meta_description">Meta description</label>
         <textarea id="meta_description" name="meta_description" rows="3">{{ page.meta_description if page else '' }}</textarea>
 
-        <label for="content">Content (Markdown)</label>
-        <textarea id="content" name="content" rows="18">{{ page.content if page else '' }}</textarea>
+        <div class="rich-editor" data-rich-editor>
+          <div class="editor-label-row">
+            <label for="content">Content</label>
+            <div class="editor-mode-tabs" role="tablist" aria-label="Editor mode">
+              <button type="button" class="active" data-editor-mode="visual">Visual</button>
+              <button type="button" data-editor-mode="source">Dev code</button>
+            </div>
+          </div>
+
+          <div class="editor-toolbar" aria-label="Formatting toolbar">
+            <button type="button" data-editor-command="formatBlock" data-editor-value="h2">H2</button>
+            <button type="button" data-editor-command="formatBlock" data-editor-value="h3">H3</button>
+            <button type="button" data-editor-command="bold">B</button>
+            <button type="button" data-editor-command="italic">I</button>
+            <button type="button" data-editor-command="insertUnorderedList">List</button>
+            <button type="button" data-editor-command="insertOrderedList">1. List</button>
+            <button type="button" data-editor-action="link">Link</button>
+            <button type="button" data-editor-action="image">Image</button>
+            <button type="button" data-editor-action="code">Code</button>
+            <button type="button" data-editor-action="quote">Quote</button>
+          </div>
+
+          <div class="visual-editor markdown-body" contenteditable="true" data-editor-visual aria-label="Visual page content editor"></div>
+          <textarea id="content" class="markdown-source" name="content" rows="18" data-editor-source>{{ page.content if page else '' }}</textarea>
+        </div>
 
         <div class="checkbox-grid">
           <label><input type="checkbox" name="published" {% if page and page.published %}checked{% endif %} /> Published</label>
@@ -43,7 +75,11 @@
       <p>Paste image paths into Markdown with <code>![alt](/uploads/file.png)</code>.</p>
       <div class="upload-list compact-list">
         {% for upload in uploads[:8] %}
-        <div><img src="/uploads/{{ upload.filename }}" alt="" /><code>/uploads/{{ upload.filename }}</code></div>
+        <div>
+          <img src="/uploads/{{ upload.filename }}" alt="" />
+          <code>/uploads/{{ upload.filename }}</code>
+          <button class="button button-secondary button-small" type="button" data-editor-insert-image="/uploads/{{ upload.filename }}">Insert image</button>
+        </div>
         {% else %}
         <p>No uploads yet.</p>
         {% endfor %}
@@ -51,4 +87,8 @@
     </aside>
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/admin_editor.js"></script>
 {% endblock %}

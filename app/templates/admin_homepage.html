@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="admin-screen container">
+  <div class="admin-panel editor-layout">
+    <div>
+      {% include "admin_nav.html" %}
+      <span class="eyebrow">Homepage</span>
+      <h1>Edit homepage</h1>
+      {% if message %}<p class="message">{{ message }}</p>{% endif %}
+      <form method="post" action="/admin/homepage" enctype="multipart/form-data" class="editor-form">
+        <div class="settings-section">
+          <h2>Hero</h2>
+
+          <label for="home_hero_image_url">Homepage hero image URL</label>
+          <input id="home_hero_image_url" type="text" name="home_hero_image_url" value="{{ site_config.home_hero_image_url }}" />
+
+          <label for="home_hero_image">Upload homepage hero image</label>
+          <input id="home_hero_image" type="file" name="home_hero_image" accept="image/*" />
+        </div>
+
+        <div class="settings-section">
+          <h2>Welcome and features</h2>
+
+          <label for="home_intro_eyebrow">Welcome eyebrow</label>
+          <input id="home_intro_eyebrow" type="text" name="home_intro_eyebrow" value="{{ site_config.home_intro_eyebrow }}" />
+
+          <label for="home_intro_title">Welcome heading</label>
+          <input id="home_intro_title" type="text" name="home_intro_title" value="{{ site_config.home_intro_title }}" />
+
+          <label for="home_intro_body">Welcome text</label>
+          <textarea id="home_intro_body" name="home_intro_body" rows="3">{{ site_config.home_intro_body }}</textarea>
+
+          <label for="home_features">Feature cards</label>
+          <textarea id="home_features" name="home_features" rows="10">{{ site_config.home_features }}</textarea>
+          <p class="field-help">One feature per line, using <code>Title|Description</code>.</p>
+        </div>
+
+        <div class="settings-section">
+          <h2>Why Kaya</h2>
+
+          <label for="home_why_eyebrow">Why Kaya eyebrow</label>
+          <input id="home_why_eyebrow" type="text" name="home_why_eyebrow" value="{{ site_config.home_why_eyebrow }}" />
+
+          <label for="home_why_title">Why Kaya heading</label>
+          <textarea id="home_why_title" name="home_why_title" rows="3">{{ site_config.home_why_title }}</textarea>
+
+          <label for="home_why_body">Why Kaya text</label>
+          <textarea id="home_why_body" name="home_why_body" rows="4">{{ site_config.home_why_body }}</textarea>
+
+          <label for="home_reasons">Why Kaya cards</label>
+          <textarea id="home_reasons" name="home_reasons" rows="5">{{ site_config.home_reasons }}</textarea>
+          <p class="field-help">One reason per line, using <code>Title|Description</code>.</p>
+        </div>
+
+        <div class="settings-section">
+          <h2>Install block</h2>
+
+          <label for="home_install_eyebrow">Install eyebrow</label>
+          <input id="home_install_eyebrow" type="text" name="home_install_eyebrow" value="{{ site_config.home_install_eyebrow }}" />
+
+          <label for="home_install_title">Install heading</label>
+          <input id="home_install_title" type="text" name="home_install_title" value="{{ site_config.home_install_title }}" />
+
+          <label for="home_install_body">Install text</label>
+          <textarea id="home_install_body" name="home_install_body" rows="3">{{ site_config.home_install_body }}</textarea>
+
+          <label for="home_install_code">Install code block</label>
+          <textarea id="home_install_code" name="home_install_code" rows="5">{{ site_config.home_install_code }}</textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="button button-primary" type="submit">Save homepage</button>
+          <a class="button button-secondary" href="/">View homepage</a>
+        </div>
+      </form>
+    </div>
+    <aside class="editor-side">
+      <h2>Upload library</h2>
+      <p>Paste an upload path into the hero image URL field, or upload a new homepage hero image.</p>
+      <div class="upload-list compact-list">
+        {% for upload in uploads[:10] %}
+        <div><img src="/uploads/{{ upload.filename }}" alt="" /><code>/uploads/{{ upload.filename }}</code></div>
+        {% else %}
+        <p>No uploads yet.</p>
+        {% endfor %}
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

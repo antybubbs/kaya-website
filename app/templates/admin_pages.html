@@ -10,12 +10,13 @@
     </header>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Title</th><th>Slug</th><th>Published</th><th>Nav</th><th>Order</th><th></th></tr></thead>
+        <thead><tr><th>Title</th><th>Slug</th><th>Parent</th><th>Published</th><th>Nav</th><th>Order</th><th></th></tr></thead>
         <tbody>
           {% for page in pages %}
           <tr>
             <td>{{ page.title }}</td>
             <td>{% if page.slug %}/{{ page.slug }}{% else %}/{% endif %}</td>
+            <td>{{ page.parent.title if page.parent else '—' }}</td>
             <td>{{ "Yes" if page.published else "No" }}</td>
             <td>{{ "Yes" if page.show_in_navigation else "No" }}</td>
             <td>{{ page.sort_order }}</td>

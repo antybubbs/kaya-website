@@ -15,7 +15,11 @@
         <span class="eyebrow">Maintenance mode</span>
         <h1>We’ll be back shortly.</h1>
         <p>{{ site_config.maintenance_message }}</p>
-        <a class="button button-secondary" href="/admin">Admin sign in</a>
+        <div class="maintenance-actions" aria-label="Maintenance actions">
+          <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>
+          <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>
+          <a class="button button-secondary" href="/admin">Admin sign in</a>
+        </div>
       </section>
     </main>
   </body>
