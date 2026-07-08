@@ -844,7 +844,7 @@ def create_app():
             message="Upload deleted." if upload_deleted else None,
             error=None,
             detected_client_ip=str(client_ip) if client_ip else "Unknown",
-            detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
+            detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
             settings=settings,
         )
 
@@ -915,6 +915,7 @@ def create_app():
         website_repo_url: str = Form(""),
         app_repo_url: str = Form(""),
         admin_allowed_ips: str = Form(""),
+        confirm_current_ip_lockout: bool = Form(False),
         maintenance_enabled: bool = Form(False),
         maintenance_message: str = Form(""),
         logo_image: UploadFile | None = File(None),
@@ -935,11 +936,15 @@ def create_app():
                 message=None,
                 error="The admin allowlist contains an invalid IP address or network.",
                 detected_client_ip=str(client_ip) if client_ip else "Unknown",
-                detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
+                detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
                 settings=settings,
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
-        if admin_allowed_ips.strip() and not ip_is_allowed(client_ip, admin_allowed_ips):
+        if (
+            admin_allowed_ips.strip()
+            and not ip_is_allowed(client_ip, admin_allowed_ips)
+            and not confirm_current_ip_lockout
+        ):
             return render_template(
                 "admin_settings.html",
                 title="Site settings",
@@ -947,9 +952,9 @@ def create_app():
                 site_config={**crud.get_site_settings(db), "admin_allowed_ips": admin_allowed_ips},
                 uploads=crud.list_uploads(db),
                 message=None,
-                error=f"Settings not saved: the allowlist does not include your current IP ({client_ip or 'Unknown'}).",
+                error=f"Settings not saved: the allowlist does not include the address used by your current connection ({client_ip or 'Unknown'}). Add it, or confirm below that you intend to block this connection.",
                 detected_client_ip=str(client_ip) if client_ip else "Unknown",
-                detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
+                detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
                 settings=settings,
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
@@ -975,7 +980,7 @@ def create_app():
             message="Settings saved.",
             error=None,
             detected_client_ip=str(client_ip) if client_ip else "Unknown",
-            detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
+            detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
             settings=settings,
         )
 
