@@ -844,7 +844,7 @@ def create_app():
             message="Upload deleted." if upload_deleted else None,
             error=None,
             detected_client_ip=str(client_ip) if client_ip else "Unknown",
-            detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
+            detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
             settings=settings,
         )
 
@@ -936,7 +936,7 @@ def create_app():
                 message=None,
                 error="The admin allowlist contains an invalid IP address or network.",
                 detected_client_ip=str(client_ip) if client_ip else "Unknown",
-                detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
+                detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
                 settings=settings,
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
@@ -954,7 +954,7 @@ def create_app():
                 message=None,
                 error=f"Settings not saved: the allowlist does not include the address used by your current connection ({client_ip or 'Unknown'}). Add it, or confirm below that you intend to block this connection.",
                 detected_client_ip=str(client_ip) if client_ip else "Unknown",
-                detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
+                detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
                 settings=settings,
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
@@ -980,7 +980,7 @@ def create_app():
             message="Settings saved.",
             error=None,
             detected_client_ip=str(client_ip) if client_ip else "Unknown",
-            detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
+            detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
             settings=settings,
         )
 
