@@ -8,6 +8,7 @@
       <span class="eyebrow">Site</span>
       <h1>Settings</h1>
       {% if message %}<p class="message">{{ message }}</p>{% endif %}
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
       <form method="post" action="/admin/settings" enctype="multipart/form-data" class="editor-form">
         <label for="site_logo_url">Hero and footer logo URL</label>
         <input id="site_logo_url" type="text" name="site_logo_url" value="{{ site_config.site_logo_url }}" />
@@ -27,6 +28,10 @@
         <label for="app_repo_url">Kaya app GitHub repository URL</label>
         <input id="app_repo_url" type="url" name="app_repo_url" value="{{ site_config.app_repo_url }}" placeholder="https://github.com/antybubbs/kaya" />
 
+        <label for="admin_allowed_ips">Admin IP allowlist</label>
+        <textarea id="admin_allowed_ips" name="admin_allowed_ips" rows="3" placeholder="203.0.113.10&#10;192.168.1.0/24">{{ site_config.admin_allowed_ips }}</textarea>
+        <p class="form-help">Only these IP addresses or CIDR networks can access <code>/admin</code>. Separate entries with commas or new lines. Leave blank to allow access from any IP. Your detected IP is <code>{{ detected_client_ip }}</code>.</p>
+
         <label class="checkbox-label"><input type="checkbox" name="maintenance_enabled" {% if site_config.maintenance_enabled %}checked{% endif %} /> Enable maintenance mode</label>
 
         <label for="maintenance_message">Maintenance message</label>
@@ -43,7 +48,14 @@
       <p>Paste an upload path into the logo URL fields, or upload a new image here.</p>
       <div class="upload-list compact-list">
         {% for upload in uploads[:10] %}
-        <div><img src="/uploads/{{ upload.filename }}" alt="" /><code>/uploads/{{ upload.filename }}</code></div>
+        <div>
+          <img src="/uploads/{{ upload.filename }}" alt="{{ upload.original_filename }}" />
+          <code>/uploads/{{ upload.filename }}</code>
+          <form method="post" action="/admin/uploads/{{ upload.id }}/delete" onsubmit="return confirm('Delete this upload permanently? Any page using it will show a broken image.');">
+            <input type="hidden" name="return_to" value="settings" />
+            <button class="button button-danger" type="submit">Delete</button>
+          </form>
+        </div>
         {% else %}
         <p>No uploads yet.</p>
         {% endfor %}

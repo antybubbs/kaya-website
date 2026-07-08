@@ -17,6 +17,9 @@
         <img src="/uploads/{{ upload.filename }}" alt="{{ upload.original_filename }}" />
         <strong>{{ upload.original_filename }}</strong>
         <code>/uploads/{{ upload.filename }}</code>
+        <form method="post" action="/admin/uploads/{{ upload.id }}/delete" onsubmit="return confirm('Delete this upload permanently? Any page using it will show a broken image.');">
+          <button class="button button-danger" type="submit">Delete</button>
+        </form>
       </article>
       {% else %}
       <p>No images uploaded yet.</p>

@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     account_lockout_duration: int = 900  # seconds
     session_timeout: int = 3600  # seconds (1 hour)
     cors_origins: str = "*"  # Restrict in production
+    # Comma-separated IPs/CIDRs of reverse proxies whose forwarding headers may
+    # be trusted when determining the real client IP.
+    trusted_proxy_ips: str = ""
     
     class Config:
         env_file = BASE_DIR / ".env"

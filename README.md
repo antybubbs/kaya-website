@@ -160,7 +160,15 @@ For HTTPS, terminate TLS at your reverse proxy and set:
 BASE_URL=https://kaya.example.com
 SESSION_COOKIE_SECURE=true
 ALLOWED_HOSTS=kaya.example.com
+# Set this to the exact IP/CIDR from which the proxy connects to the app.
+# Examples: 127.0.0.1 or 172.18.0.0/16 for a dedicated Docker network.
+TRUSTED_PROXY_IPS=127.0.0.1
 ```
+
+The admin IP allowlist is managed under **Admin → Settings**. It accepts
+individual IPv4/IPv6 addresses and CIDR networks. Leave it blank to disable
+IP filtering. When a reverse proxy is used, `TRUSTED_PROXY_IPS` must identify
+only proxies you control; forwarding headers from all other clients are ignored.
 
 ## Development
 
