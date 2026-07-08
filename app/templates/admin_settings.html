@@ -29,8 +29,11 @@
         <input id="app_repo_url" type="url" name="app_repo_url" value="{{ site_config.app_repo_url }}" placeholder="https://github.com/antybubbs/kaya" />
 
         <label for="admin_allowed_ips">Admin IP allowlist</label>
-        <textarea id="admin_allowed_ips" name="admin_allowed_ips" rows="3" placeholder="203.0.113.10&#10;192.168.1.0/24">{{ site_config.admin_allowed_ips }}</textarea>
-        <p class="form-help">Only these IP addresses or CIDR networks can access <code>/admin</code>. Separate entries with commas or new lines. Leave blank to allow access from any IP. Your detected IP is <code>{{ detected_client_ip }}</code>.</p>
+        <textarea id="admin_allowed_ips" name="admin_allowed_ips" rows="3" placeholder="198.51.100.25&#10;2001:db8:1234::/48">{{ site_config.admin_allowed_ips }}</textarea>
+        <p class="form-help">Enter the external/public IPv4 or IPv6 addresses that may access <code>/admin</code>. CIDR networks are supported. Separate entries with commas or new lines; leave blank to disable filtering. Your detected address is <code>{{ detected_client_ip }}</code>.</p>
+        {% if detected_client_ip_is_private %}
+        <p class="alert alert-error">The detected address is private. You are either connecting from the local network or the app is seeing your reverse proxy. If <code>{{ detected_client_ip }}</code> is your proxy, set <code>TRUSTED_PROXY_IPS={{ detected_client_ip }}</code> in the deployment environment and restart the container. Confirm that your public address is then shown before enabling the allowlist.</p>
+        {% endif %}
 
         <label class="checkbox-label"><input type="checkbox" name="maintenance_enabled" {% if site_config.maintenance_enabled %}checked{% endif %} /> Enable maintenance mode</label>
 

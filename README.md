@@ -169,6 +169,9 @@ The admin IP allowlist is managed under **Admin → Settings**. It accepts
 individual IPv4/IPv6 addresses and CIDR networks. Leave it blank to disable
 IP filtering. When a reverse proxy is used, `TRUSTED_PROXY_IPS` must identify
 only proxies you control; forwarding headers from all other clients are ignored.
+For the included Compose files, put this in the project's `.env` file, for
+example `TRUSTED_PROXY_IPS=192.168.1.3`, then recreate the container. Confirm
+that Settings shows your public address before saving the allowlist.
 
 ## Development
 
