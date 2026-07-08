@@ -10,6 +10,7 @@ DEFAULT_SITE_SETTINGS = {
     "app_repo_url": "https://github.com/antybubbs/kaya",
     "maintenance_enabled": "false",
     "maintenance_message": "Kaya is currently undergoing maintenance. Please check back shortly.",
+    "admin_allowed_ips": "",
     "home_content": '<span class="eyebrow">Command your self-hosted infrastructure</span>\n<h1>One private operations console for the systems you run.</h1>\n<p>Kaya brings servers, services, remote access, runbooks, licences, assets and operational history into a calm self-hosted control plane.</p>\n<div class="hero-actions">\n  <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>\n  <a class="button button-secondary" href="/install">Get Started</a>\n  <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>\n</div>',
     "home_intro_eyebrow": "Your Infrastructure. Your Home.",
     "home_intro_title": "Welcome to Kaya.",
@@ -280,6 +281,11 @@ def create_upload(db: Session, filename: str, original_filename: str, content_ty
 
 def list_uploads(db: Session):
     return db.scalars(select(models.Upload).order_by(models.Upload.created_at.desc())).all()
+
+
+def delete_upload(db: Session, upload: models.Upload):
+    db.delete(upload)
+    db.commit()
 
 
 def set_site_setting(db: Session, key: str, value: str | None):

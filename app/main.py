@@ -4,6 +4,7 @@ import re
 import base64
 import json
 import time
+import ipaddress
 from urllib.parse import urlparse
 from urllib.request import Request as UrlRequest, urlopen
 from urllib.error import URLError, HTTPError
@@ -61,6 +62,59 @@ def get_nav_items(db):
 
 def has_admin_users(db) -> bool:
     return db.scalar(select(models.AdminUser.id)) is not None
+
+
+def parse_ip_networks(value: str):
+    networks = []
+    for item in re.split(r"[\s,]+", value or ""):
+        if item:
+            networks.append(ipaddress.ip_network(item, strict=False))
+    return networks
+
+
+def get_client_ip(request: Request) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    peer_value = request.client.host if request.client else ""
+    try:
+        peer_ip = ipaddress.ip_address(peer_value)
+    except ValueError:
+        return None
+
+    try:
+        trusted_proxies = parse_ip_networks(settings.trusted_proxy_ips)
+    except ValueError:
+        trusted_proxies = []
+
+    if any(peer_ip in network for network in trusted_proxies):
+        forwarded = request.headers.get("X-Forwarded-For", "")
+        if forwarded:
+            try:
+                chain = [ipaddress.ip_address(item.strip()) for item in forwarded.split(",")]
+            except ValueError:
+                return None
+            current = peer_ip
+            for candidate in reversed(chain):
+                if not any(current in network for network in trusted_proxies):
+                    break
+                current = candidate
+            return current
+        real_ip = request.headers.get("X-Real-IP", "").strip()
+        if real_ip:
+            try:
+                return ipaddress.ip_address(real_ip)
+            except ValueError:
+                return None
+    return peer_ip
+
+
+def ip_is_allowed(client_ip, allowlist: str) -> bool:
+    if not (allowlist or "").strip():
+        return True
+    if client_ip is None:
+        return False
+    try:
+        return any(client_ip in network for network in parse_ip_networks(allowlist))
+    except ValueError:
+        return False
 
 
 def parse_github_repo(repo_url: str) -> tuple[str, str] | None:
@@ -215,12 +269,13 @@ def build_docs_sidebar(pages):
 
 
 def render_template(template_name: str, **context):
+    response_status = context.pop("status_code", status.HTTP_200_OK)
     if "site_config" not in context:
         with SessionLocal() as db:
             context["site_config"] = crud.get_site_settings(db)
     context.setdefault("release_versions", get_release_versions(get_release_repo_urls(context.get("site_config"))))
     template = env.get_template(template_name)
-    return HTMLResponse(template.render(**context))
+    return HTMLResponse(template.render(**context), status_code=response_status)
 
 
 def sanitize_html(content: str) -> str:
@@ -455,6 +510,16 @@ def create_app():
 
     app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
     app.mount("/uploads", StaticFiles(directory=settings.uploads_dir), name="uploads")
+
+    @app.middleware("http")
+    async def admin_ip_allowlist_middleware(request: Request, call_next):
+        if request.url.path == "/admin" or request.url.path.startswith("/admin/"):
+            with SessionLocal() as db:
+                allowlist = crud.get_site_settings(db).get("admin_allowed_ips", "")
+            if not ip_is_allowed(get_client_ip(request), allowlist):
+                # A plain 403 avoids revealing whether the admin login exists.
+                return HTMLResponse("Forbidden", status_code=status.HTTP_403_FORBIDDEN)
+        return await call_next(request)
 
     @app.middleware("http")
     async def maintenance_mode_middleware(request: Request, call_next):
@@ -741,16 +806,45 @@ def create_app():
         await save_upload(image, db)
         return RedirectResponse(url="/admin/uploads", status_code=status.HTTP_302_FOUND)
 
-    @app.get("/admin/settings", response_class=HTMLResponse)
-    def admin_site_settings(request: Request, db=Depends(get_db)):
+    @app.post("/admin/uploads/{upload_id}/delete")
+    def admin_upload_delete(
+        request: Request,
+        upload_id: int,
+        return_to: str = Form("uploads"),
+        db=Depends(get_db),
+    ):
         require_admin(request)
+        upload = db.get(models.Upload, upload_id)
+        if not upload:
+            raise HTTPException(status_code=404, detail="Upload not found")
+
+        uploads_root = settings.uploads_dir.resolve()
+        upload_path = (uploads_root / upload.filename).resolve()
+        if upload_path.parent != uploads_root:
+            raise HTTPException(status_code=400, detail="Invalid upload path")
+        try:
+            upload_path.unlink(missing_ok=True)
+        except OSError:
+            raise HTTPException(status_code=500, detail="The upload file could not be deleted")
+
+        crud.delete_upload(db, upload)
+        destination = "/admin/settings?upload_deleted=true" if return_to == "settings" else "/admin/uploads"
+        return RedirectResponse(url=destination, status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.get("/admin/settings", response_class=HTMLResponse)
+    def admin_site_settings(request: Request, upload_deleted: bool = False, db=Depends(get_db)):
+        require_admin(request)
+        client_ip = get_client_ip(request)
         return render_template(
             "admin_settings.html",
             title="Site settings",
             nav_items=[],
             site_config=crud.get_site_settings(db),
             uploads=crud.list_uploads(db),
-            message=None,
+            message="Upload deleted." if upload_deleted else None,
+            error=None,
+            detected_client_ip=str(client_ip) if client_ip else "Unknown",
+            detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
             settings=settings,
         )
 
@@ -820,6 +914,7 @@ def create_app():
         header_logo_url: str = Form(""),
         website_repo_url: str = Form(""),
         app_repo_url: str = Form(""),
+        admin_allowed_ips: str = Form(""),
         maintenance_enabled: bool = Form(False),
         maintenance_message: str = Form(""),
         logo_image: UploadFile | None = File(None),
@@ -827,6 +922,37 @@ def create_app():
         db=Depends(get_db),
     ):
         require_admin(request)
+        client_ip = get_client_ip(request)
+        try:
+            parse_ip_networks(admin_allowed_ips)
+        except ValueError:
+            return render_template(
+                "admin_settings.html",
+                title="Site settings",
+                nav_items=[],
+                site_config={**crud.get_site_settings(db), "admin_allowed_ips": admin_allowed_ips},
+                uploads=crud.list_uploads(db),
+                message=None,
+                error="The admin allowlist contains an invalid IP address or network.",
+                detected_client_ip=str(client_ip) if client_ip else "Unknown",
+                detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
+                settings=settings,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+        if admin_allowed_ips.strip() and not ip_is_allowed(client_ip, admin_allowed_ips):
+            return render_template(
+                "admin_settings.html",
+                title="Site settings",
+                nav_items=[],
+                site_config={**crud.get_site_settings(db), "admin_allowed_ips": admin_allowed_ips},
+                uploads=crud.list_uploads(db),
+                message=None,
+                error=f"Settings not saved: the allowlist does not include your current IP ({client_ip or 'Unknown'}).",
+                detected_client_ip=str(client_ip) if client_ip else "Unknown",
+                detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
+                settings=settings,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
         if logo_image and logo_image.filename:
             uploaded_logo = await save_upload(logo_image, db)
             site_logo_url = f"/uploads/{uploaded_logo.filename}"
@@ -837,6 +963,7 @@ def create_app():
         crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "website_repo_url", website_repo_url or settings.website_github_url)
         crud.set_site_setting(db, "app_repo_url", app_repo_url or settings.github_url)
+        crud.set_site_setting(db, "admin_allowed_ips", admin_allowed_ips.strip())
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")
         return render_template(
@@ -846,6 +973,9 @@ def create_app():
             site_config=crud.get_site_settings(db),
             uploads=crud.list_uploads(db),
             message="Settings saved.",
+            error=None,
+            detected_client_ip=str(client_ip) if client_ip else "Unknown",
+            detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
             settings=settings,
         )
 
