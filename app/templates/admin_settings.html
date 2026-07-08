@@ -28,6 +28,10 @@
         <label for="app_repo_url">Kaya app GitHub repository URL</label>
         <input id="app_repo_url" type="url" name="app_repo_url" value="{{ site_config.app_repo_url }}" placeholder="https://github.com/antybubbs/kaya" />
 
+        <label for="external_nav_links">External navigation links</label>
+        <textarea id="external_nav_links" name="external_nav_links" rows="4" placeholder="Kaya App | https://app.example.com | 45&#10;Community | https://community.example.com | 55">{{ site_config.external_nav_links }}</textarea>
+        <p class="form-help">Add one top-bar link per line using <code>Label | URL | Order</code>. The order is optional and defaults to 100. External links open in a new tab.</p>
+
         <label for="admin_allowed_ips">Admin IP allowlist</label>
         <textarea id="admin_allowed_ips" name="admin_allowed_ips" rows="3" placeholder="198.51.100.25&#10;2001:db8:1234::/48">{{ site_config.admin_allowed_ips }}</textarea>
         <p class="form-help">Enter the external/public IPv4 or IPv6 addresses that may access <code>/admin</code>. CIDR networks are supported. Separate entries with commas or new lines; leave blank to disable filtering.</p>

@@ -57,7 +57,24 @@ def get_db():
 
 
 def get_nav_items(db):
-    return crud.list_pages(db, only_published=True, navigation_only=True)
+    pages = crud.list_pages(db, only_published=True, navigation_only=True)
+    page_map = {page.id: page for page in crud.get_pages(db, only_published=True)}
+    items = [
+        {
+            "title": page.title,
+            "href": crud.get_page_url(page, page_map),
+            "sort_order": page.sort_order,
+            "external": False,
+        }
+        for page in pages
+    ]
+    external_links = crud.get_site_settings(db).get("external_nav_links", "")
+    try:
+        items.extend(parse_external_nav_links(external_links))
+    except ValueError:
+        # Invalid stored settings should not break the public website.
+        pass
+    return sorted(items, key=lambda item: (item["sort_order"], item["title"].lower()))
 
 
 def has_admin_users(db) -> bool:
@@ -70,6 +87,30 @@ def parse_ip_networks(value: str):
         if item:
             networks.append(ipaddress.ip_network(item, strict=False))
     return networks
+
+
+def parse_external_nav_links(value: str):
+    links = []
+    for line_number, raw_line in enumerate((value or "").splitlines(), start=1):
+        if not raw_line.strip():
+            continue
+        parts = [part.strip() for part in raw_line.split("|")]
+        if len(parts) not in (2, 3) or not parts[0] or not parts[1]:
+            raise ValueError(f"Navigation link on line {line_number} must use Label | URL | Order.")
+        parsed = urlparse(parts[1])
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ValueError(f"Navigation link on line {line_number} must use a full http:// or https:// URL.")
+        try:
+            sort_order = int(parts[2]) if len(parts) == 3 and parts[2] else 100
+        except ValueError:
+            raise ValueError(f"Navigation link order on line {line_number} must be a whole number.")
+        links.append({
+            "title": parts[0],
+            "href": parts[1],
+            "sort_order": sort_order,
+            "external": True,
+        })
+    return links
 
 
 def get_client_ip(request: Request) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
@@ -914,6 +955,7 @@ def create_app():
         header_logo_url: str = Form(""),
         website_repo_url: str = Form(""),
         app_repo_url: str = Form(""),
+        external_nav_links: str = Form(""),
         admin_allowed_ips: str = Form(""),
         confirm_current_ip_lockout: bool = Form(False),
         maintenance_enabled: bool = Form(False),
@@ -931,12 +973,36 @@ def create_app():
                 "admin_settings.html",
                 title="Site settings",
                 nav_items=[],
-                site_config={**crud.get_site_settings(db), "admin_allowed_ips": admin_allowed_ips},
+                site_config={
+                    **crud.get_site_settings(db),
+                    "admin_allowed_ips": admin_allowed_ips,
+                    "external_nav_links": external_nav_links,
+                },
                 uploads=crud.list_uploads(db),
                 message=None,
                 error="The admin allowlist contains an invalid IP address or network.",
                 detected_client_ip=str(client_ip) if client_ip else "Unknown",
                 detected_client_ip_is_private=bool(client_ip and client_ip.is_private),
+                settings=settings,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            parse_external_nav_links(external_nav_links)
+        except ValueError as exc:
+            return render_template(
+                "admin_settings.html",
+                title="Site settings",
+                nav_items=[],
+                site_config={
+                    **crud.get_site_settings(db),
+                    "admin_allowed_ips": admin_allowed_ips,
+                    "external_nav_links": external_nav_links,
+                },
+                uploads=crud.list_uploads(db),
+                message=None,
+                error=str(exc),
+                detected_client_ip=str(client_ip) if client_ip else "Unknown",
+                detected_client_ip_is_private=bool(client_ip and not client_ip.is_global),
                 settings=settings,
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
@@ -949,7 +1015,11 @@ def create_app():
                 "admin_settings.html",
                 title="Site settings",
                 nav_items=[],
-                site_config={**crud.get_site_settings(db), "admin_allowed_ips": admin_allowed_ips},
+                site_config={
+                    **crud.get_site_settings(db),
+                    "admin_allowed_ips": admin_allowed_ips,
+                    "external_nav_links": external_nav_links,
+                },
                 uploads=crud.list_uploads(db),
                 message=None,
                 error=f"Settings not saved: the allowlist does not include the address used by your current connection ({client_ip or 'Unknown'}). Add it, or confirm below that you intend to block this connection.",
@@ -968,6 +1038,7 @@ def create_app():
         crud.set_site_setting(db, "header_logo_url", header_logo_url or "/static/brand/kaya-full-logo.svg")
         crud.set_site_setting(db, "website_repo_url", website_repo_url or settings.website_github_url)
         crud.set_site_setting(db, "app_repo_url", app_repo_url or settings.github_url)
+        crud.set_site_setting(db, "external_nav_links", external_nav_links.strip())
         crud.set_site_setting(db, "admin_allowed_ips", admin_allowed_ips.strip())
         crud.set_site_setting(db, "maintenance_enabled", "true" if maintenance_enabled else "false")
         crud.set_site_setting(db, "maintenance_message", maintenance_message or "Kaya is currently undergoing maintenance. Please check back shortly.")

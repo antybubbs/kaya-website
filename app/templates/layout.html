@@ -20,7 +20,7 @@
           <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya" /></a>
           <nav class="site-nav" aria-label="Main navigation">
             {% for item in nav_items %}
-            <a class="nav-link" href="/{{ item.slug }}">{{ item.title }}</a>
+            <a class="nav-link" href="{{ item.href }}"{% if item.external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.title }}</a>
             {% endfor %}
             <a class="nav-link" href="/blog">Updates</a>
             <a class="nav-link nav-cta" href="/install">Get Started</a>
