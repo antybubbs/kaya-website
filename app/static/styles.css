@@ -1461,3 +1461,251 @@ tbody tr:hover {
     position: static;
   }
 }
+
+/* Responsive site navigation and final small-screen layout pass */
+.nav-toggle {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  html {
+    overflow-x: hidden;
+  }
+
+  body {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .container,
+  .site-header .container,
+  .section.container,
+  .band > .container,
+  .hero-brand-row,
+  .hero-professional .hero-grid,
+  .hero-professional .hero-grid.hero-grid-image-only {
+    width: calc(100% - 28px);
+    max-width: none;
+  }
+
+  .site-header {
+    position: sticky;
+  }
+
+  .header-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 68px;
+    padding: 7px 0;
+    gap: 12px;
+  }
+
+  .site-header .brand-compact {
+    min-width: 0;
+    width: fit-content;
+  }
+
+  .site-header .brand-compact img,
+  .brand-full-logo {
+    width: 112px;
+    max-width: 100%;
+    height: 52px;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 138, 0, 0.34);
+    border-radius: 8px;
+    background: rgba(255, 138, 0, 0.09);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 750;
+  }
+
+  .nav-toggle-icon,
+  .nav-toggle-icon::before,
+  .nav-toggle-icon::after {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+
+  .nav-toggle-icon {
+    position: relative;
+  }
+
+  .nav-toggle-icon::before,
+  .nav-toggle-icon::after {
+    position: absolute;
+    left: 0;
+    content: "";
+  }
+
+  .nav-toggle-icon::before { top: -6px; }
+  .nav-toggle-icon::after { top: 6px; }
+
+  .nav-open .nav-toggle-icon {
+    background: transparent;
+  }
+
+  .nav-open .nav-toggle-icon::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
+
+  .nav-open .nav-toggle-icon::after {
+    top: 0;
+    transform: rotate(-45deg);
+  }
+
+  .site-header .site-nav {
+    display: none;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    padding: 8px 0 6px;
+    gap: 6px;
+  }
+
+  .site-header.nav-open .site-nav {
+    display: grid;
+  }
+
+  .site-header .nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 9px 11px;
+    white-space: normal;
+  }
+
+  .site-header .nav-cta {
+    justify-content: center;
+  }
+
+  .content {
+    padding: 28px 0;
+  }
+
+  .page-content,
+  .auth-panel,
+  .admin-panel {
+    padding: 20px 18px;
+  }
+
+  .page-content h1 {
+    font-size: clamp(2rem, 10vw, 2.6rem);
+    overflow-wrap: anywhere;
+  }
+
+  .markdown-body h2 {
+    margin-top: 1.35em;
+    font-size: clamp(1.35rem, 7vw, 1.75rem);
+  }
+
+  .markdown-body img {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero,
+  .hero-professional {
+    padding: 28px 0 22px;
+  }
+
+  .hero-professional .hero-copy h1,
+  .hero-copy h1 {
+    font-size: clamp(2.25rem, 12vw, 3rem);
+  }
+
+  .hero-product-shot {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: auto;
+  }
+
+  .hero-grid-image-only .dashboard-screenshot,
+  .dashboard-screenshot {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  .section {
+    padding: 42px 0;
+  }
+
+  .band > .split-section {
+    padding: 42px 0;
+  }
+
+  .feature-card,
+  .post-card,
+  .reason-list div,
+  .code-panel {
+    padding: 18px;
+  }
+
+  .footer-grid {
+    gap: 30px;
+  }
+
+  .footer-full-logo {
+    width: min(190px, 100%);
+    height: auto;
+  }
+
+  .image-lightbox {
+    padding: 58px 10px 14px;
+  }
+
+  .image-lightbox[open] {
+    grid-template-columns: 38px minmax(0, 1fr) 38px;
+    gap: 4px;
+  }
+
+  .image-lightbox figure {
+    height: calc(100dvh - 72px);
+  }
+
+  .image-lightbox figure img {
+    max-height: calc(100dvh - 130px);
+  }
+
+  .image-lightbox-nav {
+    width: 38px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .nav-toggle {
+    width: 44px;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .site-header .site-nav {
+    grid-template-columns: 1fr;
+  }
+}

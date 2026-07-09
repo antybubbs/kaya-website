@@ -18,7 +18,11 @@
       <header class="site-header">
         <div class="container header-inner">
           <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya" /></a>
-          <nav class="site-nav" aria-label="Main navigation">
+          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation">
+            <span class="nav-toggle-label">Menu</span>
+            <span class="nav-toggle-icon" aria-hidden="true"></span>
+          </button>
+          <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
             {% for item in nav_items %}
             <a class="nav-link" href="{{ item.href }}"{% if item.external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.title }}</a>
             {% endfor %}
@@ -69,6 +73,7 @@
         </div>
       </footer>
     </div>
+    <script src="/static/site.js" defer></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
