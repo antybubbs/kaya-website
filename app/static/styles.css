@@ -201,6 +201,7 @@ button, input, textarea { font: inherit; }
 .post-card h2, .post-card h3 { font-size: 1.25rem; }
 
 .content { padding: 64px 0; }
+.content.container { width: min(1440px, calc(100% - 40px)); }
 .page-content { width: 100%; max-width: none; margin: 0 auto; padding: 34px; }
 .markdown-body { color: #c4cedd; }
 .markdown-body a { color: #86f3ee; text-decoration: underline; text-underline-offset: 3px; }
@@ -1606,6 +1607,10 @@ tbody tr:hover {
 
   .content {
     padding: 28px 0;
+  }
+
+  .content.container {
+    width: calc(100% - 28px);
   }
 
   .page-content,
