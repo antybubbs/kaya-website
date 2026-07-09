@@ -11,16 +11,19 @@
     <meta name="theme-color" content="#0d0f13" />
     <link rel="icon" href="/static/brand/kaya-favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/static/brand/kaya-apple-touch-icon-180.png" />
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260709-4" />
   </head>
   <body>
     <div class="page-shell">
       <header class="site-header">
         <div class="container header-inner">
           <a class="brand brand-compact" href="/" aria-label="Kaya home"><img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya" /></a>
-          <nav class="site-nav" aria-label="Main navigation">
+          <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-navigation" hidden>
+            <span class="nav-toggle-icon" aria-hidden="true"></span>
+          </button>
+          <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
             {% for item in nav_items %}
-            <a class="nav-link" href="/{{ item.slug }}">{{ item.title }}</a>
+            <a class="nav-link" href="{{ item.href }}"{% if item.external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.title }}</a>
             {% endfor %}
             <a class="nav-link" href="/blog">Updates</a>
             <a class="nav-link nav-cta" href="/install">Get Started</a>
@@ -69,6 +72,7 @@
         </div>
       </footer>
     </div>
+    <script src="/static/site.js?v=20260709-4" defer></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

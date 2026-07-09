@@ -28,12 +28,18 @@
         <label for="app_repo_url">Kaya app GitHub repository URL</label>
         <input id="app_repo_url" type="url" name="app_repo_url" value="{{ site_config.app_repo_url }}" placeholder="https://github.com/antybubbs/kaya" />
 
+        <label for="external_nav_links">External navigation links</label>
+        <textarea id="external_nav_links" name="external_nav_links" rows="4" placeholder="Kaya App | https://app.example.com | 45&#10;Community | https://community.example.com | 55">{{ site_config.external_nav_links }}</textarea>
+        <p class="form-help">Add one top-bar link per line using <code>Label | URL | Order</code>. The order is optional and defaults to 100. External links open in a new tab.</p>
+
         <label for="admin_allowed_ips">Admin IP allowlist</label>
         <textarea id="admin_allowed_ips" name="admin_allowed_ips" rows="3" placeholder="198.51.100.25&#10;2001:db8:1234::/48">{{ site_config.admin_allowed_ips }}</textarea>
-        <p class="form-help">Enter the external/public IPv4 or IPv6 addresses that may access <code>/admin</code>. CIDR networks are supported. Separate entries with commas or new lines; leave blank to disable filtering. Your detected address is <code>{{ detected_client_ip }}</code>.</p>
+        <p class="form-help">Enter the external/public IPv4 or IPv6 addresses that may access <code>/admin</code>. CIDR networks are supported. Separate entries with commas or new lines; leave blank to disable filtering.</p>
+        <p class="form-help">Address seen by the server for this connection: <code>{{ detected_client_ip }}</code>. When connected through NetBird or another VPN, this will be the tunnel address because the server cannot see the public IP hidden behind the tunnel.</p>
         {% if detected_client_ip_is_private %}
-        <p class="alert alert-error">The detected address is private. You are either connecting from the local network or the app is seeing your reverse proxy. If <code>{{ detected_client_ip }}</code> is your proxy, set <code>TRUSTED_PROXY_IPS={{ detected_client_ip }}</code> in the deployment environment and restart the container. Confirm that your public address is then shown before enabling the allowlist.</p>
+        <p class="alert alert-error">This is a private or tunnel address. If it belongs to a reverse proxy, configure <code>TRUSTED_PROXY_IPS={{ detected_client_ip }}</code>. Do not do that when it is your own NetBird client address.</p>
         {% endif %}
+        <label class="checkbox-label"><input type="checkbox" name="confirm_current_ip_lockout" /> Allow saving even if this blocks my current connection</label>
 
         <label class="checkbox-label"><input type="checkbox" name="maintenance_enabled" {% if site_config.maintenance_enabled %}checked{% endif %} /> Enable maintenance mode</label>
 
