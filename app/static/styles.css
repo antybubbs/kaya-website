@@ -1499,7 +1499,7 @@ tbody tr:hover {
   .header-inner {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
     min-height: 68px;
     padding: 7px 0;
@@ -1507,6 +1507,8 @@ tbody tr:hover {
   }
 
   .site-header .brand-compact {
+    grid-column: 2;
+    justify-self: center;
     min-width: 0;
     width: fit-content;
   }
@@ -1521,6 +1523,8 @@ tbody tr:hover {
   }
 
   .nav-toggle {
+    grid-column: 3;
+    justify-self: end;
     display: inline-grid;
     place-items: center;
     align-items: center;
@@ -1589,8 +1593,10 @@ tbody tr:hover {
   .site-header .nav-link {
     display: flex;
     align-items: center;
+    justify-content: center;
     min-height: 44px;
     padding: 9px 11px;
+    text-align: center;
     white-space: normal;
   }
 
@@ -1606,6 +1612,7 @@ tbody tr:hover {
   .auth-panel,
   .admin-panel {
     padding: 20px 18px;
+    text-align: center;
   }
 
   .page-content h1 {
@@ -1621,6 +1628,20 @@ tbody tr:hover {
   .markdown-body img {
     width: 100%;
     max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .markdown-body ul,
+  .markdown-body ol {
+    padding-left: 0;
+    list-style-position: inside;
+  }
+
+  .markdown-body pre,
+  .markdown-body table,
+  .markdown-body th,
+  .markdown-body td {
+    text-align: left;
   }
 
   .hero,
@@ -1637,6 +1658,7 @@ tbody tr:hover {
     width: 100%;
     max-width: 100%;
     aspect-ratio: auto;
+    margin-inline: auto;
   }
 
   .hero-grid-image-only .dashboard-screenshot,
@@ -1648,10 +1670,37 @@ tbody tr:hover {
 
   .section {
     padding: 42px 0;
+    text-align: center;
   }
 
   .band > .split-section {
     padding: 42px 0;
+    text-align: center;
+  }
+
+  .hero-actions,
+  .hero-professional .hero-actions {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .hero-actions .button,
+  .hero-professional .hero-actions .button {
+    width: min(240px, 100%);
+  }
+
+  .section-heading,
+  .split-section > div,
+  .feature-card,
+  .post-card,
+  .reason-list div {
+    text-align: center;
+  }
+
+  .section-heading p,
+  .split-section p {
+    margin-inline: auto;
   }
 
   .feature-card,
@@ -1663,6 +1712,32 @@ tbody tr:hover {
 
   .footer-grid {
     gap: 30px;
+    text-align: center;
+  }
+
+  .footer-grid > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-grid p,
+  .footer-grid a {
+    text-align: center;
+  }
+
+  .release-list {
+    justify-items: center;
+    width: 100%;
+  }
+
+  .release-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 12px;
+    width: 100%;
+    text-align: center;
   }
 
   .footer-full-logo {
