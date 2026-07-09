@@ -1467,6 +1467,10 @@ tbody tr:hover {
   display: none;
 }
 
+.nav-toggle[hidden] {
+  display: none !important;
+}
+
 @media (max-width: 760px) {
   html {
     overflow-x: hidden;
@@ -1517,17 +1521,17 @@ tbody tr:hover {
   }
 
   .nav-toggle {
-    display: inline-flex;
+    display: inline-grid;
+    place-items: center;
     align-items: center;
-    gap: 8px;
-    min-height: 42px;
-    padding: 8px 12px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
     border: 1px solid rgba(255, 138, 0, 0.34);
-    border-radius: 8px;
-    background: rgba(255, 138, 0, 0.09);
+    border-radius: 10px;
+    background: rgba(255, 138, 0, 0.07);
     color: #fff;
     cursor: pointer;
-    font-weight: 750;
   }
 
   .nav-toggle-icon,
@@ -1690,21 +1694,6 @@ tbody tr:hover {
 }
 
 @media (max-width: 380px) {
-  .nav-toggle-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  .nav-toggle {
-    width: 44px;
-    justify-content: center;
-    padding-inline: 0;
-  }
-
   .site-header .site-nav {
     grid-template-columns: 1fr;
   }
