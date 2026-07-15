@@ -1,11 +1,12 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<section class="content container">
-  <article class="page-content">
-    <time class="eyebrow" datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%d %b %Y') }}</time>
-    <h1>{{ post.title }}</h1>
-    {% if post.excerpt %}<p class="lede">{{ post.excerpt }}</p>{% endif %}
+<section class="content-section">
+  <article class="page-content article-content glass-panel">
+    {% set page_title = post.title %}
+    {% set page_eyebrow = post.published_at.strftime('%d %b %Y') %}
+    {% set page_lede = post.excerpt %}
+    {% include "components/page_header.html" %}
     <div class="markdown-body">{{ post_html | safe }}</div>
   </article>
 </section>

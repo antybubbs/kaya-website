@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% set body_class = "admin-site" %}
+
+{% block site_header %}
+<header class="admin-site-header">
+  <div class="admin-header-inner">
+    <a class="admin-brand" href="/admin/pages" aria-label="Kaya CMS home">
+      <img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya" />
+      <span>CMS</span>
+    </a>
+    <a class="button button-ghost button-small" href="/">View website</a>
+  </div>
+</header>
+{% endblock %}
+
+{% block site_footer %}{% endblock %}

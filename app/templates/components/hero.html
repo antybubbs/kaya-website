@@ -1,0 +1,13 @@
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy reveal">
+      {{ home_content_html | safe }}
+    </div>
+    <div class="hero-visual glass-panel reveal" aria-label="Kaya product preview">
+      <div class="product-frame-bar" aria-hidden="true">
+        <span></span><span></span><span></span><strong>Kaya Command</strong>
+      </div>
+      <img class="dashboard-screenshot" src="{{ site_config.home_hero_image_url }}" alt="Kaya dashboard showing infrastructure status and operational information." fetchpriority="high" decoding="async" />
+    </div>
+  </div>
+</section>

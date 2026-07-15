@@ -1,0 +1,16 @@
+{% macro render_tree_node(node, current_path, depth=0) -%}
+  {% set node_path = node.url.lstrip('/') %}
+  {% set is_current = current_path == node_path %}
+  {% set is_open = is_current or current_path.startswith(node_path + '/') %}
+  {% set has_children = node.children and node.children|length > 0 %}
+  <li class="docs-node depth-{{ depth }}{% if is_current %} active{% endif %}">
+    {% if has_children %}
+      <details class="docs-details"{% if is_open %} open{% endif %}>
+        <summary><a href="{{ node.url }}"{% if is_current %} aria-current="page"{% endif %}>{{ node.title }}</a></summary>
+        <ul>{% for child in node.children %}{{ render_tree_node(child, current_path, depth + 1) }}{% endfor %}</ul>
+      </details>
+    {% else %}
+      <a href="{{ node.url }}"{% if is_current %} aria-current="page"{% endif %}>{{ node.title }}</a>
+    {% endif %}
+  </li>
+{%- endmacro %}

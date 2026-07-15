@@ -1,0 +1,5 @@
+<header class="section-heading{% if heading_centered %} section-heading-centered{% endif %}">
+  {% if heading_eyebrow %}<span class="eyebrow">{{ heading_eyebrow }}</span>{% endif %}
+  <h2{% if heading_id %} id="{{ heading_id }}"{% endif %}>{{ heading_title }}</h2>
+  {% if heading_body %}<p>{{ heading_body }}</p>{% endif %}
+</header>

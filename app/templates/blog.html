@@ -1,22 +1,15 @@
 {% extends "layout.html" %}
+{% from "components/blog_cards.html" import post_card %}
 
 {% block content %}
-<section class="content container">
-  <div class="section-heading compact-heading">
+<section class="content-section listing-page">
+  <header class="page-header listing-header">
     <span class="eyebrow">Project updates</span>
     <h1>Kaya updates</h1>
-    <p>Release notes, implementation notes and self-hosted infrastructure writing.</p>
-  </div>
+    <p class="lede">Release notes, implementation notes and self-hosted infrastructure writing.</p>
+  </header>
   <div class="post-grid">
-    {% for post in posts %}
-    <article class="post-card">
-      <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%d %b %Y') }}</time>
-      <h2><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h2>
-      <p>{{ post.excerpt }}</p>
-    </article>
-    {% else %}
-    <p>No updates published yet.</p>
-    {% endfor %}
+    {% for post in posts %}{{ post_card(post, "h2") }}{% else %}<p class="empty-state glass-panel">No updates published yet.</p>{% endfor %}
   </div>
 </section>
 {% endblock %}

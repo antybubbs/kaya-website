@@ -1,16 +1,20 @@
-{% extends "layout.html" %}
+{% extends "admin_layout.html" %}
 
 {% block content %}
 <section class="admin-screen container">
   <div class="admin-panel editor-layout">
     <div>
-      {% include "admin_nav.html" %}
+      {% include "components/admin_nav.html" %}
       <span class="eyebrow">Homepage</span>
       <h1>Edit homepage</h1>
       {% if message %}<p class="message">{{ message }}</p>{% endif %}
       <form method="post" action="/admin/homepage" enctype="multipart/form-data" class="editor-form">
         <div class="settings-section">
           <h2>Hero</h2>
+
+          <label for="home_content">Hero content</label>
+          <textarea id="home_content" name="home_content" rows="12">{{ site_config.home_content }}</textarea>
+          <p class="field-help">HTML is sanitised before display. Existing demo and GitHub URL placeholders remain supported.</p>
 
           <label for="home_hero_image_url">Homepage hero image URL</label>
           <input id="home_hero_image_url" type="text" name="home_hero_image_url" value="{{ site_config.home_hero_image_url }}" />

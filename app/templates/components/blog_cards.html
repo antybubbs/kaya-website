@@ -1,0 +1,8 @@
+{% macro post_card(post, heading_level="h3") -%}
+<article class="post-card glass-panel">
+  <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%d %b %Y') }}</time>
+  <{{ heading_level }}><a href="/blog/{{ post.slug }}">{{ post.title }}</a></{{ heading_level }}>
+  {% if post.excerpt %}<p>{{ post.excerpt }}</p>{% endif %}
+  <a class="card-link" href="/blog/{{ post.slug }}" aria-label="Read {{ post.title }}">Read update <span aria-hidden="true">→</span></a>
+</article>
+{%- endmacro %}

@@ -1,80 +1,54 @@
 {% extends "layout.html" %}
+{% from "components/blog_cards.html" import post_card %}
 
 {% block content %}
-<section class="hero hero-professional">
-  <div class="container hero-grid hero-grid-image-only">
-    <div class="hero-product-shot" aria-label="Kaya Command dashboard screenshot">
-      <img class="dashboard-screenshot" src="{{ site_config.home_hero_image_url if site_config else '/static/kaya-dashboard-screenshot.svg' }}" alt="Kaya Command dashboard showing infrastructure at a glance, live status, compute metrics and VM Docker Manager." />
-    </div>
-    <div class="hero-actions" aria-label="Primary actions">
-      <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>
-      <a class="button button-secondary" href="/install">Get Started</a>
-      <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>
-    </div>
+{% include "components/hero.html" %}
+
+<section class="section home-features" aria-labelledby="features-heading">
+  {% set heading_eyebrow = site_config.home_intro_eyebrow %}
+  {% set heading_title = site_config.home_intro_title %}
+  {% set heading_body = site_config.home_intro_body %}
+  {% set heading_centered = true %}
+  {% set heading_id = "features-heading" %}
+  {% include "components/section_heading.html" %}
+  <div class="feature-grid">
+    {% for feature in home_features %}{% set feature_index = loop.index %}{% include "components/feature_card.html" %}{% endfor %}
   </div>
 </section>
 
-<section class="section container home-memory-section">
-  <div class="section-heading">
-    <span class="eyebrow">{{ site_config.home_intro_eyebrow }}</span>
-    <h2>{{ site_config.home_intro_title }}</h2>
-    <p>{{ site_config.home_intro_body }}</p>
+<section class="section section-split why-section" aria-labelledby="why-heading">
+  <div class="section-copy">
+    <span class="eyebrow">{{ site_config.home_why_eyebrow }}</span>
+    <h2 id="why-heading">{{ site_config.home_why_title }}</h2>
+    <p>{{ site_config.home_why_body }}</p>
   </div>
-  <div class="feature-grid">
-    {% for feature in home_features %}
-    <article class="feature-card">
-      <span class="feature-index">{{ loop.index }}</span>
-      <h3>{{ feature.title }}</h3>
-      <p>{{ feature.body }}</p>
-    </article>
+  <div class="reason-list">
+    {% for reason in home_reasons %}
+    <article class="reason-card glass-panel"><span aria-hidden="true">{{ "%02d" | format(loop.index) }}</span><div><h3>{{ reason.title }}</h3><p>{{ reason.body }}</p></div></article>
     {% endfor %}
   </div>
 </section>
 
-<section class="band">
-  <div class="container split-section">
-    <div>
-      <span class="eyebrow">{{ site_config.home_why_eyebrow }}</span>
-      <h2>{{ site_config.home_why_title }}</h2>
-      <p>{{ site_config.home_why_body }}</p>
-    </div>
-    <div class="reason-list">
-      {% for reason in home_reasons %}
-      <div><strong>{{ reason.title }}</strong><span>{{ reason.body }}</span></div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<section class="section container split-section">
-  <div>
+<section class="section section-split install-section" aria-labelledby="install-heading">
+  <div class="section-copy">
     <span class="eyebrow">{{ site_config.home_install_eyebrow }}</span>
-    <h2>{{ site_config.home_install_title }}</h2>
+    <h2 id="install-heading">{{ site_config.home_install_title }}</h2>
     <p>{{ site_config.home_install_body }}</p>
+    <a class="card-link" href="/install">View installation guide <span aria-hidden="true">→</span></a>
   </div>
-  <div class="code-panel">
-    <pre><code>{{ site_config.home_install_code }}</code></pre>
-  </div>
+  {% include "components/code_panel.html" %}
 </section>
 
 {% if posts %}
-<section class="section container">
-  <div class="section-heading compact-heading">
-    <span class="eyebrow">Updates</span>
-    <h2>Latest from Kaya</h2>
+<section class="section updates-section" aria-labelledby="updates-heading">
+  <div class="section-heading-row">
+    <div>
+      <span class="eyebrow">Updates</span>
+      <h2 id="updates-heading">Latest from Kaya</h2>
+    </div>
+    <a class="button button-secondary button-small" href="/blog">View all updates</a>
   </div>
-  <div class="post-grid">
-    {% for post in posts %}
-    <article class="post-card">
-      <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%d %b %Y') }}</time>
-      <h3><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h3>
-      <p>{{ post.excerpt }}</p>
-    </article>
-    {% endfor %}
-  </div>
+  <div class="post-grid">{% for post in posts %}{{ post_card(post) }}{% endfor %}</div>
 </section>
 {% endif %}
 {% endblock %}
-
-
-

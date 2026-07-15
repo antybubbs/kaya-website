@@ -5,20 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kaya maintenance</title>
     <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0b0e13" />
     <link rel="icon" href="/static/brand/kaya-favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260715-1" />
   </head>
-  <body>
+  <body class="maintenance-site">
+    <div class="site-canvas" aria-hidden="true"></div>
     <main class="maintenance-screen">
-      <section class="maintenance-panel">
+      <section class="maintenance-panel glass-panel">
         <img src="{{ site_config.site_logo_url }}" alt="Kaya" />
         <span class="eyebrow">Maintenance mode</span>
         <h1>We’ll be back shortly.</h1>
         <p>{{ site_config.maintenance_message }}</p>
         <div class="maintenance-actions" aria-label="Maintenance actions">
           <a class="button button-primary" href="{{ settings.demo_url }}">View Demo</a>
-          <a class="button button-ghost" href="{{ settings.github_url }}" target="_blank" rel="noreferrer">GitHub</a>
-          <a class="button button-secondary" href="/admin">Admin sign in</a>
+          <a class="button button-secondary" href="{{ settings.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
       </section>
     </main>
