@@ -12,7 +12,7 @@
       {% endfor %}
       <a class="nav-link" href="/blog"{% if active_path == '/blog' or active_path.startswith('/blog/') %} aria-current="page"{% endif %}>Updates</a>
       <a class="nav-link" href="{{ site_config.app_repo_url if site_config else settings.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>
-      <a class="button button-primary nav-cta" href="/install">Get Started</a>
+      <a class="button button-primary nav-cta" href="https://docs.kaya-app.uk/docs/getting-started/what-is-kaya">Get Started</a>
     </nav>
   </div>
 </header>
