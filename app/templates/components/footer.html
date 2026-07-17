@@ -1,0 +1,31 @@
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-intro">
+      <a class="brand footer-brand" href="/">
+        <img src="{{ site_config.site_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya - Your Infrastructure. Your Home." />
+      </a>
+      <p>Self-hosted infrastructure, documentation, assets, remote access and monitoring for practical operators.</p>
+    </div>
+    <div>
+      <h2>Product</h2>
+      <a href="/features">Features</a>
+      <a href="/screenshots">Screenshots</a>
+      <a href="/documentation">Documentation</a>
+      <a href="/roadmap">Roadmap</a>
+    </div>
+    <div>
+      <h2>Project</h2>
+      <a href="{{ site_config.app_repo_url if site_config else settings.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="{{ settings.demo_url }}">Demo</a>
+      <a href="/blog">Updates</a>
+    </div>
+    <div>
+      <h2>Release</h2>
+      <dl class="release-list">
+        <div class="release-item"><dt>Website</dt><dd>{{ release_versions.website }}</dd></div>
+        <div class="release-item"><dt>Kaya app</dt><dd>{{ release_versions.app }}</dd></div>
+      </dl>
+      <p>&copy; 2026 Kaya. Self-hosted and open-source.</p>
+    </div>
+  </div>
+</footer>

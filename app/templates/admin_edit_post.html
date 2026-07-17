@@ -1,10 +1,10 @@
-{% extends "layout.html" %}
+{% extends "admin_layout.html" %}
 
 {% block content %}
 <section class="admin-screen container">
   <div class="admin-panel editor-layout">
     <div>
-      {% include "admin_nav.html" %}
+      {% include "components/admin_nav.html" %}
       <span class="eyebrow">Updates</span>
       <h1>{{ post and 'Edit update' or 'Create update' }}</h1>
       {% if message %}<p class="message">{{ message }}</p>{% endif %}

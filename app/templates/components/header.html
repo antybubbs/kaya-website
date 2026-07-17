@@ -1,0 +1,18 @@
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand brand-compact" href="/" aria-label="Kaya home">
+      <img src="{{ site_config.header_logo_url if site_config else '/static/brand/kaya-full-logo.svg' }}" alt="Kaya" />
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-navigation" hidden>
+      <span class="nav-toggle-icon" aria-hidden="true"></span>
+    </button>
+    <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
+      {% for item in nav_items %}
+      <a class="nav-link" href="{{ item.href }}"{% if active_path == item.href %} aria-current="page"{% endif %}{% if item.external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.title }}</a>
+      {% endfor %}
+      <a class="nav-link" href="/blog"{% if active_path == '/blog' or active_path.startswith('/blog/') %} aria-current="page"{% endif %}>Updates</a>
+      <a class="nav-link" href="{{ site_config.app_repo_url if site_config else settings.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a class="button button-primary nav-cta" href="/install">Get Started</a>
+    </nav>
+  </div>
+</header>

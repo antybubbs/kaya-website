@@ -1,28 +1,14 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<section class="content container">
-  <article class="page-content">
-    <p class="eyebrow">Kaya</p>
-    <h1>{{ page.title }}</h1>
+<section class="content-section">
+  <article class="page-content glass-panel">
+    {% set page_title = page.title %}
+    {% include "components/page_header.html" %}
     <div class="markdown-body">{{ page_html | safe }}</div>
   </article>
 </section>
-
-<dialog class="image-lightbox" aria-label="Screenshot viewer">
-  <button class="image-lightbox-close" type="button" aria-label="Close image viewer">&times;</button>
-  <button class="image-lightbox-nav image-lightbox-previous" type="button" aria-label="Previous screenshot">&#8249;</button>
-  <figure>
-    <img src="" alt="" />
-    <figcaption>
-      <span class="image-lightbox-caption"></span>
-      <span class="image-lightbox-count"></span>
-    </figcaption>
-  </figure>
-  <button class="image-lightbox-nav image-lightbox-next" type="button" aria-label="Next screenshot">&#8250;</button>
-</dialog>
+{% include "components/image_lightbox.html" %}
 {% endblock %}
 
-{% block scripts %}
-<script src="/static/page-gallery.js?v=20260709-4" defer></script>
-{% endblock %}
+{% block scripts %}<script src="/static/page-gallery.js?v=20260715-1" defer></script>{% endblock %}

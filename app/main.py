@@ -248,6 +248,13 @@ def common_context(db=None, **context):
         context.setdefault("site_config", crud.get_site_settings(db))
     context.setdefault("settings", settings)
     context.setdefault("release_versions", get_release_versions(get_release_repo_urls(context.get("site_config"))))
+    request = context.get("request")
+    if request is not None:
+        context.setdefault("active_path", request.url.path)
+        context.setdefault(
+            "canonical_url",
+            f"{str(settings.base_url).rstrip('/')}{request.url.path}",
+        )
     return context
 
 
@@ -333,6 +340,31 @@ def sanitize_html(content: str) -> str:
     }
     raw_html = markdown(content or "", extensions=["fenced_code", "tables", "sane_lists"])
     return bleach.clean(raw_html, tags=allowed_tags, attributes=allowed_attrs, protocols=["http", "https", "mailto"], strip=True)
+
+
+def sanitize_home_content(content: str) -> str:
+    """Render the CMS-owned homepage hero without evaluating arbitrary Jinja."""
+    replacements = {
+        "{{ settings.demo_url }}": settings.demo_url,
+        "{{ settings.github_url }}": settings.github_url,
+    }
+    rendered = content or ""
+    for placeholder, value in replacements.items():
+        rendered = rendered.replace(placeholder, str(value))
+
+    allowed_tags = {"a", "br", "div", "em", "h1", "p", "span", "strong"}
+    allowed_attrs = {
+        "a": ["class", "href", "rel", "target"],
+        "div": ["class"],
+        "span": ["class"],
+    }
+    return bleach.clean(
+        rendered,
+        tags=allowed_tags,
+        attributes=allowed_attrs,
+        protocols=["http", "https", "mailto"],
+        strip=True,
+    )
 
 
 def parse_homepage_items(value: str, fallback: str = ""):
@@ -596,9 +628,11 @@ def create_app():
             "home.html",
             **common_context(
                 db,
+                request=request,
                 title="Kaya",
                 posts=posts,
                 site_config=site_config,
+                home_content_html=sanitize_home_content(site_config.get("home_content", "")),
                 home_features=parse_homepage_items(site_config.get("home_features", "")),
                 home_reasons=parse_homepage_items(site_config.get("home_reasons", "")),
             ),
@@ -607,7 +641,7 @@ def create_app():
     @app.get("/blog", response_class=HTMLResponse)
     def public_blog(request: Request, db=Depends(get_db)):
         posts = crud.list_posts(db, only_published=True)
-        return render_template("blog.html", **common_context(db, title="Kaya updates", posts=posts, meta_description="Kaya project updates, releases and self-hosted infrastructure notes."))
+        return render_template("blog.html", **common_context(db, request=request, title="Kaya updates", posts=posts, meta_description="Kaya project updates, releases and self-hosted infrastructure notes."))
 
     @app.get("/blog/{slug}", response_class=HTMLResponse)
     def public_post(request: Request, slug: str, db=Depends(get_db)):
@@ -616,7 +650,7 @@ def create_app():
             raise HTTPException(status_code=404, detail="Post not found")
         return render_template(
             "post.html",
-            **common_context(db, title=post.title, meta_description=post.excerpt, post=post, post_html=sanitize_html(post.content or "")),
+            **common_context(db, request=request, title=post.title, meta_description=post.excerpt, post=post, post_html=sanitize_html(post.content or "")),
         )
 
     @app.get("/admin", response_class=HTMLResponse)
@@ -905,6 +939,7 @@ def create_app():
     @app.post("/admin/homepage", response_class=HTMLResponse)
     async def admin_homepage_update(
         request: Request,
+        home_content: str = Form(""),
         home_hero_image_url: str = Form(""),
         home_intro_eyebrow: str = Form(""),
         home_intro_title: str = Form(""),
@@ -925,6 +960,7 @@ def create_app():
         if home_hero_image and home_hero_image.filename:
             uploaded_home_hero = await save_upload(home_hero_image, db)
             home_hero_image_url = f"/uploads/{uploaded_home_hero.filename}"
+        crud.set_site_setting(db, "home_content", home_content)
         crud.set_site_setting(db, "home_hero_image_url", home_hero_image_url or "/static/kaya-dashboard-screenshot.svg")
         crud.set_site_setting(db, "home_intro_eyebrow", home_intro_eyebrow)
         crud.set_site_setting(db, "home_intro_title", home_intro_title)
@@ -1186,6 +1222,7 @@ def create_app():
                 "docs_page.html",
                 **common_context(
                     db,
+                    request=request,
                     title=page.title,
                     meta_description=page.meta_description,
                     page=page,
@@ -1201,6 +1238,7 @@ def create_app():
                 "page_hierarchy.html",
                 **common_context(
                     db,
+                    request=request,
                     title=page.title,
                     meta_description=page.meta_description,
                     page=page,
@@ -1210,7 +1248,7 @@ def create_app():
                 ),
             )
 
-        return render_template("page.html", **common_context(db, title=page.title, meta_description=page.meta_description, page=page, page_html=sanitize_html(page.content or "")))
+        return render_template("page.html", **common_context(db, request=request, title=page.title, meta_description=page.meta_description, page=page, page_html=sanitize_html(page.content or "")))
 
     return app
 

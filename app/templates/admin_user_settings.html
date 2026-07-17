@@ -1,10 +1,10 @@
-{% extends "layout.html" %}
+{% extends "admin_layout.html" %}
 
 {% block content %}
 <section class="admin-screen container">
   <div class="admin-panel editor-layout">
     <div>
-      {% include "admin_nav.html" %}
+      {% include "components/admin_nav.html" %}
       <span class="eyebrow">Account</span>
       <h1>User Settings</h1>
       {% if message %}<p class="message">{{ message }}</p>{% endif %}
@@ -31,7 +31,7 @@
         </form>
       </div>
 
-      <hr style="margin: 32px 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.14);">
+      <hr class="admin-divider">
 
       <div class="settings-section">
         <h2>Two-Factor Authentication</h2>
@@ -63,18 +63,18 @@
       </div>
 
       {% if show_2fa_setup %}
-        <hr style="margin: 32px 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.14);">
+        <hr class="admin-divider">
         
         <div class="settings-section">
           <h2>Setup Two-Factor Authentication</h2>
           <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.):</p>
           
-          <div style="background: white; padding: 16px; border-radius: 8px; width: fit-content; margin: 16px 0;">
-            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width: 256px; height: 256px;">
+          <div class="qr-code-panel">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
           </div>
 
           <p><strong>Or enter this code manually:</strong></p>
-          <code style="display: block; padding: 12px; background: rgba(79, 126, 255, 0.1); border-radius: 6px; margin: 12px 0; font-family: monospace; letter-spacing: 0.1em;">{{ totp_secret }}</code>
+          <code class="totp-secret">{{ totp_secret }}</code>
 
           <form method="post" action="/admin/user-settings" class="editor-form">
             <input type="hidden" name="section" value="verify-2fa">
@@ -89,14 +89,14 @@
         </div>
 
         {% if backup_codes %}
-          <hr style="margin: 32px 0; border: none; border-top: 1px solid rgba(148, 163, 184, 0.14);">
+          <hr class="admin-divider">
           
           <div class="settings-section">
             <h2>Backup Codes</h2>
             <p><strong>Save these codes in a safe place.</strong> You can use them to access your account if you lose access to your authenticator app.</p>
             
-            <div style="background: rgba(255, 193, 7, 0.1); padding: 16px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 16px 0;">
-              <code style="display: block; white-space: pre-wrap; font-family: monospace; line-height: 1.8;">{% for code in backup_codes %}{{ code }}
+            <div class="backup-codes">
+              <code>{% for code in backup_codes %}{{ code }}
 {% endfor %}</code>
             </div>
           </div>
@@ -106,38 +106,4 @@
   </div>
 </section>
 
-<style>
-  .help-text {
-    font-size: 0.9rem;
-    color: #94a3b8;
-    margin-top: 4px;
-  }
-  
-  .success-text {
-    color: #4ade80;
-    font-size: 0.95rem;
-  }
-  
-  .error-message {
-    background: rgba(239, 68, 68, 0.1);
-    border-left: 4px solid #ef4444;
-    color: #fca5a5;
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 16px;
-  }
-  
-  .message {
-    background: rgba(74, 222, 128, 0.1);
-    border-left: 4px solid #4ade80;
-    color: #86efac;
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 16px;
-  }
-  
-  .settings-section {
-    margin-bottom: 24px;
-  }
-</style>
 {% endblock %}

@@ -1,9 +1,9 @@
-{% extends "layout.html" %}
+{% extends "admin_layout.html" %}
 
 {% block content %}
 <section class="admin-screen container">
   <div class="admin-panel">
-    {% include "admin_nav.html" %}
+    {% include "components/admin_nav.html" %}
     <header class="admin-panel-header">
       <div><span class="eyebrow">News</span><h1>Updates</h1></div>
       <a class="button button-primary" href="/admin/posts/new">New update</a>
