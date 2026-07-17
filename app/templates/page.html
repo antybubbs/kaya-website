@@ -2,7 +2,7 @@
 
 {% block content %}
 <section class="content-section">
-  <article class="page-content glass-panel">
+  <article class="page-content glass-panel{% if page.slug == 'screenshots' %} screenshots-page{% endif %}">
     {% set page_title = page.title %}
     {% include "components/page_header.html" %}
     <div class="markdown-body">{{ page_html | safe }}</div>
