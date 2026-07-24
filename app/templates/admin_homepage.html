@@ -14,13 +14,34 @@
 
           <label for="home_content">Hero content</label>
           <textarea id="home_content" name="home_content" rows="12">{{ site_config.home_content }}</textarea>
-          <p class="field-help">HTML is sanitised before display. Existing demo and GitHub URL placeholders remain supported.</p>
+          <p class="field-help">HTML is sanitised before display. Buttons are managed separately below.</p>
 
           <label for="home_hero_image_url">Homepage hero image URL</label>
           <input id="home_hero_image_url" type="text" name="home_hero_image_url" value="{{ site_config.home_hero_image_url }}" />
 
           <label for="home_hero_image">Upload homepage hero image</label>
           <input id="home_hero_image" type="file" name="home_hero_image" accept="image/*" />
+
+          <h3>Hero buttons</h3>
+          <p class="field-help">Leave both fields for a button blank to hide it.</p>
+
+          <label for="home_primary_button_label">Primary button text</label>
+          <input id="home_primary_button_label" type="text" name="home_primary_button_label" value="{{ site_config.home_primary_button_label }}" />
+
+          <label for="home_primary_button_url">Primary button link</label>
+          <input id="home_primary_button_url" type="text" name="home_primary_button_url" value="{{ site_config.home_primary_button_url }}" placeholder="https://example.com or /page" />
+
+          <label for="home_secondary_button_label">Secondary button text</label>
+          <input id="home_secondary_button_label" type="text" name="home_secondary_button_label" value="{{ site_config.home_secondary_button_label }}" />
+
+          <label for="home_secondary_button_url">Secondary button link</label>
+          <input id="home_secondary_button_url" type="text" name="home_secondary_button_url" value="{{ site_config.home_secondary_button_url }}" placeholder="https://example.com or /page" />
+
+          <label for="home_tertiary_button_label">Third button text</label>
+          <input id="home_tertiary_button_label" type="text" name="home_tertiary_button_label" value="{{ site_config.home_tertiary_button_label }}" />
+
+          <label for="home_tertiary_button_url">Third button link</label>
+          <input id="home_tertiary_button_url" type="text" name="home_tertiary_button_url" value="{{ site_config.home_tertiary_button_url }}" placeholder="https://example.com or /page" />
         </div>
 
         <div class="settings-section">

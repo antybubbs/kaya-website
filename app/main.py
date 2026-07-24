@@ -342,13 +342,26 @@ def sanitize_html(content: str) -> str:
     return bleach.clean(raw_html, tags=allowed_tags, attributes=allowed_attrs, protocols=["http", "https", "mailto"], strip=True)
 
 
+def strip_legacy_home_actions(content: str) -> str:
+    """Remove the action markup used before buttons had dedicated settings."""
+    # Older installations stored these actions inside home_content. They are
+    # now rendered from dedicated settings so existing databases do not show
+    # a duplicate set of buttons.
+    return re.sub(
+        r"""<div\s+class=(["'])hero-actions\1[^>]*>.*?</div\s*>""",
+        "",
+        content or "",
+        flags=re.IGNORECASE | re.DOTALL,
+    ).strip()
+
+
 def sanitize_home_content(content: str) -> str:
     """Render the CMS-owned homepage hero without evaluating arbitrary Jinja."""
     replacements = {
         "{{ settings.demo_url }}": settings.demo_url,
         "{{ settings.github_url }}": settings.github_url,
     }
-    rendered = content or ""
+    rendered = strip_legacy_home_actions(content)
     for placeholder, value in replacements.items():
         rendered = rendered.replace(placeholder, str(value))
 
@@ -365,6 +378,16 @@ def sanitize_home_content(content: str) -> str:
         protocols=["http", "https", "mailto"],
         strip=True,
     )
+
+
+def sanitize_action_url(value: str) -> str:
+    """Allow ordinary web links and local paths in CMS-managed buttons."""
+    value = (value or "").strip()
+    if value.startswith(("/", "#")) and not value.startswith("//"):
+        return value
+    if urlparse(value).scheme.lower() in {"http", "https", "mailto"}:
+        return value
+    return ""
 
 
 def parse_homepage_items(value: str, fallback: str = ""):
@@ -624,6 +647,23 @@ def create_app():
     def public_home(request: Request, db=Depends(get_db)):
         posts = crud.list_posts(db, only_published=True)[:3]
         site_config = crud.get_site_settings(db)
+        home_actions = [
+            {
+                "label": site_config.get("home_primary_button_label", ""),
+                "url": sanitize_action_url(site_config.get("home_primary_button_url", "")),
+                "class_name": "button-primary",
+            },
+            {
+                "label": site_config.get("home_secondary_button_label", ""),
+                "url": sanitize_action_url(site_config.get("home_secondary_button_url", "")),
+                "class_name": "button-secondary",
+            },
+            {
+                "label": site_config.get("home_tertiary_button_label", ""),
+                "url": sanitize_action_url(site_config.get("home_tertiary_button_url", "")),
+                "class_name": "button-ghost",
+            },
+        ]
         return render_template(
             "home.html",
             **common_context(
@@ -633,6 +673,7 @@ def create_app():
                 posts=posts,
                 site_config=site_config,
                 home_content_html=sanitize_home_content(site_config.get("home_content", "")),
+                home_actions=home_actions,
                 home_features=parse_homepage_items(site_config.get("home_features", "")),
                 home_reasons=parse_homepage_items(site_config.get("home_reasons", "")),
             ),
@@ -926,11 +967,13 @@ def create_app():
     @app.get("/admin/homepage", response_class=HTMLResponse)
     def admin_homepage(request: Request, db=Depends(get_db)):
         require_admin(request)
+        site_config = crud.get_site_settings(db)
+        site_config["home_content"] = strip_legacy_home_actions(site_config.get("home_content", ""))
         return render_template(
             "admin_homepage.html",
             title="Homepage",
             nav_items=[],
-            site_config=crud.get_site_settings(db),
+            site_config=site_config,
             uploads=crud.list_uploads(db),
             message=None,
             settings=settings,
@@ -941,6 +984,12 @@ def create_app():
         request: Request,
         home_content: str = Form(""),
         home_hero_image_url: str = Form(""),
+        home_primary_button_label: str = Form(""),
+        home_primary_button_url: str = Form(""),
+        home_secondary_button_label: str = Form(""),
+        home_secondary_button_url: str = Form(""),
+        home_tertiary_button_label: str = Form(""),
+        home_tertiary_button_url: str = Form(""),
         home_intro_eyebrow: str = Form(""),
         home_intro_title: str = Form(""),
         home_intro_body: str = Form(""),
@@ -960,8 +1009,14 @@ def create_app():
         if home_hero_image and home_hero_image.filename:
             uploaded_home_hero = await save_upload(home_hero_image, db)
             home_hero_image_url = f"/uploads/{uploaded_home_hero.filename}"
-        crud.set_site_setting(db, "home_content", home_content)
+        crud.set_site_setting(db, "home_content", strip_legacy_home_actions(home_content))
         crud.set_site_setting(db, "home_hero_image_url", home_hero_image_url or "/static/kaya-dashboard-screenshot.svg")
+        crud.set_site_setting(db, "home_primary_button_label", home_primary_button_label.strip())
+        crud.set_site_setting(db, "home_primary_button_url", home_primary_button_url.strip())
+        crud.set_site_setting(db, "home_secondary_button_label", home_secondary_button_label.strip())
+        crud.set_site_setting(db, "home_secondary_button_url", home_secondary_button_url.strip())
+        crud.set_site_setting(db, "home_tertiary_button_label", home_tertiary_button_label.strip())
+        crud.set_site_setting(db, "home_tertiary_button_url", home_tertiary_button_url.strip())
         crud.set_site_setting(db, "home_intro_eyebrow", home_intro_eyebrow)
         crud.set_site_setting(db, "home_intro_title", home_intro_title)
         crud.set_site_setting(db, "home_intro_body", home_intro_body)
