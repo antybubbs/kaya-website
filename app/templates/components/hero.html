@@ -2,6 +2,13 @@
   <div class="hero-grid">
     <div class="hero-copy reveal">
       {{ home_content_html | safe }}
+      <div class="hero-actions">
+        {% for action in home_actions %}
+        {% if action.label and action.url %}
+        <a class="button {{ action.class_name }}" href="{{ action.url }}">{{ action.label }}</a>
+        {% endif %}
+        {% endfor %}
+      </div>
     </div>
     <div class="hero-visual glass-panel reveal" aria-label="Kaya product preview">
       <div class="product-frame-bar" aria-hidden="true">
